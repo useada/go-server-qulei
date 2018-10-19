@@ -18,7 +18,7 @@ var UnlockScript = redis.NewScript(1, `
 `)
 
 func TryLock(s string, ttl int64) (string, error) {
-	conn := GetRedisConn()
+	conn := GetConn()
 	if nil == conn {
 		return "", errors.New("get redis conn failed")
 	}
@@ -36,7 +36,7 @@ func TryLock(s string, ttl int64) (string, error) {
 }
 
 func UnLock(s, ticket string) error {
-	conn := GetRedisConn()
+	conn := GetConn()
 	if nil == conn {
 		return errors.New("get redis conn failed")
 	}

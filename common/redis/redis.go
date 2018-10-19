@@ -201,8 +201,8 @@ func HIncr(hkey string, key string, val int) error {
 	return err
 }
 
-func HMGetStrings(keys []string) ([]string, error) {
-	return redis.Strings(HMGet(keys))
+func HMGetStrings(hkey string, keys []string) ([]string, error) {
+	return redis.Strings(HMGet(hkey, keys))
 }
 
 func HMGetBytes(hkey string, keys []string) ([][]byte, error) {

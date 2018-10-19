@@ -5,7 +5,7 @@ port = 18091
 logpath = "/data/logs/cabinets/"
 
 [consul]
-host = "consul.dev.instance.io"
+host = "192.168.200.191:8500"
 
 [s3]
 region = "us-east-2"

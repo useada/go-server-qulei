@@ -5,7 +5,7 @@ port = 18092
 logpath = "/data/logs/esearch/"
 
 [consul]
-host = "consul.dev.instance.io"
+host = "192.168.200.191:8500"
 
 [elastic]
 hosts = ["http://172.31.40.234:9200"]
