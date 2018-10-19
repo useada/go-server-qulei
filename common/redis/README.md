@@ -1,4 +1,4 @@
-
+```
 // 全局初始化调用一次
 redis.InitRedis(conf)
 
@@ -10,3 +10,4 @@ func GetData(key string) (string, error) {
     }
     return data, nil
 }
+```

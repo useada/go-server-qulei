@@ -1,4 +1,4 @@
-
+```
 // 全局初始化调用一次
 if err := mongo.InitMongo(conf); err != nil {
     panic(err)
@@ -22,3 +22,4 @@ func CountComments(sid string) (count int, err error) {
     }
     return count, mongo.Doit("Comment", "comment", h) // 库: Comment; collect: comment
 }
+```
