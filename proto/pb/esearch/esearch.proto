@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package esearch;
+
+service Esearch {
+    rpc SearchByName(NameRequest) returns (UserInfos) {}
+
+    rpc SearchByNear(NearRequest) returns (UserInfos) {}
+}
+
+// -- Request
+
+// 用户名搜索参数
+message NameRequest {
+    string name       = 1;
+    string page_token = 2;
+}
+
+// 经纬度搜索参数
+message NearRequest {
+    double lat        = 1; 
+    double lon        = 2;
+    int32  gender     = 3;
+    string page_token = 4;
+}
+
+
+// -- Response
+
+// 用户信息
+message UserInfo {
+    string   uid        = 1; // 用户id
+    string   name       = 2; // 用户名
+    string   avatar_id  = 3; // 头像id
+    string   avatar_ex  = 4; // 头像扩展名
+    int32    typeu      = 5; // 用户类型
+    int32    state      = 6; // 用户状态
+    int64    created_at = 7;
+    int64    updated_at = 8;
+}
+
+// 关联信息数组
+message UserInfos {
+    repeated UserInfo items = 1;
+    string   page_token     = 2;
+}

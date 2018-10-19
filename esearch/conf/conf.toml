@@ -1,0 +1,12 @@
+[server]
+name = "esearch"
+host = ":18092"
+port = 18092
+logpath = "/data/logs/esearch/"
+
+[consul]
+host = "consul.dev.instance.io"
+
+[elastic]
+hosts = ["http://172.31.40.234:9200"]
+auth = ""
