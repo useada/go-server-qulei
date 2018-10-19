@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
-	proto "a.com/server/mywork/proto/pb/cabinets"
+	proto "a.com/go-server/proto/pb/cabinets"
 )
 
 type S3Client struct {

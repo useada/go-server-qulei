@@ -7,7 +7,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 
-	configor "a.com/server/mywork/common/configor"
+	configor "a.com/go-server/common/configor"
 )
 
 func Doit(db, collect string, h func(*mgo.Collection) error) error {

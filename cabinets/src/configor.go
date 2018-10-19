@@ -1,7 +1,7 @@
 package main
 
 import (
-	configor "a.com/server/mywork/common/configor"
+	configor "a.com/go-server/common/configor"
 )
 
 type Configor struct {

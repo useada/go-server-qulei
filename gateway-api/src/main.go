@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"a.com/server/mywork/common/configor"
-	"a.com/server/mywork/common/minilog"
-	"a.com/server/mywork/gclient"
+	"a.com/go-server/common/configor"
+	"a.com/go-server/common/minilog"
+	"a.com/go-server/gclient"
 )
 
 var (

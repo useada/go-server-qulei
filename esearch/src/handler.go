@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	pagetok "a.com/server/mywork/common/pagetoken"
-	proto "a.com/server/mywork/proto/pb/esearch"
+	pagetok "a.com/go-server/common/pagetoken"
+	proto "a.com/go-server/proto/pb/esearch"
 )
 
 func RegisterHandler(svr *grpc.Server) {

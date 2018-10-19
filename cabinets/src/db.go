@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 
-	"a.com/server/mywork/common/mysql"
+	"a.com/go-server/common/mysql"
 )
 
 type DBHandle struct {

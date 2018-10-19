@@ -7,7 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 
-	configor "a.com/server/mywork/common/configor"
+	configor "a.com/go-server/common/configor"
 )
 
 func Doit(db string, h func(*gorm.DB) error) error {

@@ -6,10 +6,10 @@ import (
 
 	"google.golang.org/grpc"
 
-	"a.com/server/mywork/common/configor"
-	"a.com/server/mywork/common/consul"
-	"a.com/server/mywork/common/locip"
-	"a.com/server/mywork/common/minilog"
+	"a.com/go-server/common/configor"
+	"a.com/go-server/common/consul"
+	"a.com/go-server/common/locip"
+	"a.com/go-server/common/minilog"
 )
 
 var (

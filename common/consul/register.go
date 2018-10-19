@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/consul/api"
 
-	configor "a.com/server/mywork/common/configor"
+	configor "a.com/go-server/common/configor"
 )
 
 // NewConsulRegister create a new consul register

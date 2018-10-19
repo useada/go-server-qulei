@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	proto "a.com/server/mywork/proto/pb/cabinets"
+	proto "a.com/go-server/proto/pb/cabinets"
 )
 
 type CabClient struct {

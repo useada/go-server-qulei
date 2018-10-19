@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"a.com/server/mywork/common/consul"
+	"a.com/go-server/common/consul"
 )
 
 var GrpcConns map[string]*grpc.ClientConn

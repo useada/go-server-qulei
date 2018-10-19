@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	proto "a.com/server/mywork/proto/pb/esearch"
+	proto "a.com/go-server/proto/pb/esearch"
 )
 
 type EsClient struct {

@@ -6,10 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"a.com/server/mywork/common/crypto"
-	"a.com/server/mywork/gclient"
-
-	proto "a.com/server/mywork/proto/pb/cabinets"
+	"a.com/go-server/common/crypto"
+	"a.com/go-server/gclient"
+	proto "a.com/go-server/proto/pb/cabinets"
 )
 
 type FileHandler struct {
