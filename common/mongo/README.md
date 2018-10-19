@@ -1,4 +1,4 @@
-
+<--
 // 全局初始化调用一次
 if err := mongo.InitMongo(conf); err != nil {
     panic(err)
