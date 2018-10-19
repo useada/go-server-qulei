@@ -74,5 +74,4 @@ func (w *consulWatcher) Next() ([]*naming.Update, error) {
 }
 
 func (w *consulWatcher) Close() {
-	// nothing to do
 }
