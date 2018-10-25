@@ -6,22 +6,22 @@ import (
 
 	"google.golang.org/grpc"
 
-	pagetok "a.com/go-server/common/pagetoken"
-	proto "a.com/go-server/proto/pb/esearch"
+	"a.com/go-server/common/page"
+	"a.com/go-server/proto/pb"
 )
 
 func RegisterHandler(svr *grpc.Server) {
-	proto.RegisterEsearchServer(svr, &SvrHandler{})
+	pb.RegisterEsearchServer(svr, &SvrHandler{})
 }
 
 type SvrHandler struct{}
 
 func (s *SvrHandler) SearchByName(ctx context.Context,
-	in *proto.NameRequest) (*proto.UserInfos, error) {
-	res := proto.UserInfos{Items: make([](*proto.UserInfo), 0)}
+	in *pb.NameRequest) (*pb.UserInfos, error) {
+	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
-	ptok := pagetok.PageToken{Offset: 0, Limit: 20}
+	ptok := page.PageToken{Offset: 0, Limit: 20}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
@@ -42,11 +42,11 @@ func (s *SvrHandler) SearchByName(ctx context.Context,
 }
 
 func (s *SvrHandler) SearchByNear(ctx context.Context,
-	in *proto.NearRequest) (*proto.UserInfos, error) {
-	res := proto.UserInfos{Items: make([](*proto.UserInfo), 0)}
+	in *pb.NearRequest) (*pb.UserInfos, error) {
+	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
-	ptok := pagetok.PageToken{Offset: 0, Limit: 20}
+	ptok := page.PageToken{Offset: 0, Limit: 20}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
@@ -67,9 +67,9 @@ func (s *SvrHandler) SearchByNear(ctx context.Context,
 	return &res, nil
 }
 
-func (s *SvrHandler) transUserInfo(res *proto.UserInfos, rows []SearchItem) {
+func (s *SvrHandler) transUserInfo(res *pb.UserInfos, rows []SearchItem) {
 	for _, row := range rows {
-		user := proto.UserInfo{}
+		user := pb.UserInfo{}
 		if err := json.Unmarshal(row.Source, &user); err != nil {
 			continue
 		}

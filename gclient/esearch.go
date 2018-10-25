@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	proto "a.com/go-server/proto/pb/esearch"
+	"a.com/go-server/proto/pb"
 )
 
 type EsClient struct {
@@ -12,7 +12,7 @@ type EsClient struct {
 
 var Esearch *EsClient
 
-func (e *EsClient) SearchByName(args *proto.NameRequest) (*proto.UserInfos, error) {
+func (e *EsClient) SearchByName(args *pb.NameRequest) (*pb.UserInfos, error) {
 	conn, err := getConn(e.service())
 	if err != nil {
 		return nil, err
@@ -20,10 +20,10 @@ func (e *EsClient) SearchByName(args *proto.NameRequest) (*proto.UserInfos, erro
 
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout())
 	defer cancel()
-	return proto.NewEsearchClient(conn).SearchByName(ctx, args)
+	return pb.NewEsearchClient(conn).SearchByName(ctx, args)
 }
 
-func (e *EsClient) SearchByNear(args *proto.NearRequest) (*proto.UserInfos, error) {
+func (e *EsClient) SearchByNear(args *pb.NearRequest) (*pb.UserInfos, error) {
 	conn, err := getConn(e.service())
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (e *EsClient) SearchByNear(args *proto.NearRequest) (*proto.UserInfos, erro
 
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout())
 	defer cancel()
-	return proto.NewEsearchClient(conn).SearchByNear(ctx, args)
+	return pb.NewEsearchClient(conn).SearchByNear(ctx, args)
 }
 
 func (e *EsClient) timeout() time.Duration {
