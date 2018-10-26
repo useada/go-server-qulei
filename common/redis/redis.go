@@ -7,7 +7,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	configor "a.com/go-server/common/configor"
+	"a.com/go-server/common/configor"
 )
 
 // --Bytes Int String

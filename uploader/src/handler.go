@@ -21,7 +21,7 @@ func RegisterHandler(svr *grpc.Server) {
 type SvrHandler struct{}
 
 func (s *SvrHandler) Upload(ctx context.Context,
-	in *pb.UploadRequest) (*pb.FileInfo, error) {
+	in *pb.FileUploadArgs) (*pb.FileInfo, error) {
 
 	res := pb.FileInfo{
 		Typef: in.Typef,
@@ -58,8 +58,8 @@ func (s *SvrHandler) Upload(ctx context.Context,
 	return &res, nil
 }
 
-func (s *SvrHandler) GetFileInfo(ctx context.Context,
-	in *pb.FileRequest) (*pb.FileInfo, error) {
+func (s *SvrHandler) Query(ctx context.Context,
+	in *pb.FileQueryArgs) (*pb.FileInfo, error) {
 
 	row, err := DB.GetFileInfo(in.Id)
 	if err != nil {

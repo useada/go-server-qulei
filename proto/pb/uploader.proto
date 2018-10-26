@@ -4,10 +4,10 @@ package pb;
 
 service Uploader {
     // 文件上传
-    rpc Upload(UploadRequest) returns (FileInfo) {}
+    rpc Upload(FileUploadArgs) returns (FileInfo) {}
 
     // 获取文件信息
-    rpc GetFileInfo(FileRequest) returns (FileInfo) {}
+    rpc Query(FileQueryArgs) returns (FileInfo) {}
 }
 
 // 文件类型 图片/头像/普通文件
@@ -20,7 +20,7 @@ enum FileType {
 // -- Request
 
 // 文件上传参数
-message UploadRequest {
+message FileUploadArgs {
     string   id    = 1; // 文件id sha1生成
     string   ex    = 2; // 文件扩展名
     FileType typef = 3; // 标明文件的类型，在s3上也是存放在不同的桶内
@@ -28,7 +28,7 @@ message UploadRequest {
 }
 
 // 根据文件id拉取文件信息的参数
-message FileRequest {
+message FileQueryArgs {
     string id = 1; // 文件id
 }
 

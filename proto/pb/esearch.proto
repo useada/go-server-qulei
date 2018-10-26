@@ -3,21 +3,21 @@ syntax = "proto3";
 package pb;
 
 service Esearch {
-    rpc SearchByName(NameRequest) returns (UserInfos) {}
+    rpc SearchByName(SearchNameArgs) returns (SearchUserInfos) {}
 
-    rpc SearchByNear(NearRequest) returns (UserInfos) {}
+    rpc SearchByNear(SearchNearArgs) returns (SearchUserInfos) {}
 }
 
 // -- Request
 
 // 用户名搜索参数
-message NameRequest {
+message SearchNameArgs {
     string name       = 1;
     string page_token = 2;
 }
 
 // 经纬度搜索参数
-message NearRequest {
+message SearchNearArgs {
     double lat        = 1; 
     double lon        = 2;
     int32  gender     = 3;
@@ -28,7 +28,7 @@ message NearRequest {
 // -- Response
 
 // 用户信息
-message UserInfo {
+message SearchUserInfo {
     string   uid        = 1; // 用户id
     string   name       = 2; // 用户名
     string   avatar_id  = 3; // 头像id
@@ -40,7 +40,7 @@ message UserInfo {
 }
 
 // 关联信息数组
-message UserInfos {
-    repeated UserInfo items = 1;
+message SearchUserInfos {
+    repeated SearchUserInfo items = 1;
     string   page_token     = 2;
 }

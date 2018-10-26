@@ -17,8 +17,8 @@ func RegisterHandler(svr *grpc.Server) {
 type SvrHandler struct{}
 
 func (s *SvrHandler) SearchByName(ctx context.Context,
-	in *pb.NameRequest) (*pb.UserInfos, error) {
-	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
+	in *pb.SearchNameArgs) (*pb.SearchUserInfos, error) {
+	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
 
 	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
 	ptok := page.PageToken{Offset: 0, Limit: 20}
@@ -42,8 +42,8 @@ func (s *SvrHandler) SearchByName(ctx context.Context,
 }
 
 func (s *SvrHandler) SearchByNear(ctx context.Context,
-	in *pb.NearRequest) (*pb.UserInfos, error) {
-	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
+	in *pb.SearchNearArgs) (*pb.SearchUserInfos, error) {
+	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
 
 	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
 	ptok := page.PageToken{Offset: 0, Limit: 20}
@@ -67,9 +67,9 @@ func (s *SvrHandler) SearchByNear(ctx context.Context,
 	return &res, nil
 }
 
-func (s *SvrHandler) transUserInfo(res *pb.UserInfos, rows []SearchItem) {
+func (s *SvrHandler) transUserInfo(res *pb.SearchUserInfos, rows []SearchItem) {
 	for _, row := range rows {
-		user := pb.UserInfo{}
+		user := pb.SearchUserInfo{}
 		if err := json.Unmarshal(row.Source, &user); err != nil {
 			continue
 		}

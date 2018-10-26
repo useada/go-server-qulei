@@ -1,0 +1,13 @@
+syntax = "proto3";                                                                                                                       
+package pb;
+
+message ReplyBaseInfo {
+    string id = 1;
+}
+
+message UserBaseInfo {
+    string uid       = 1;
+    string uname     = 2;
+    string avatar_id = 3;
+    string avatar_ex = 4;
+}

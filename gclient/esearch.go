@@ -12,7 +12,7 @@ type EsClient struct {
 
 var Esearch *EsClient
 
-func (e *EsClient) SearchByName(args *pb.NameRequest) (*pb.UserInfos, error) {
+func (e *EsClient) SearchByName(args *pb.SearchNameArgs) (*pb.SearchUserInfos, error) {
 	conn, err := getConn(e.service())
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (e *EsClient) SearchByName(args *pb.NameRequest) (*pb.UserInfos, error) {
 	return pb.NewEsearchClient(conn).SearchByName(ctx, args)
 }
 
-func (e *EsClient) SearchByNear(args *pb.NearRequest) (*pb.UserInfos, error) {
+func (e *EsClient) SearchByNear(args *pb.SearchNearArgs) (*pb.SearchUserInfos, error) {
 	conn, err := getConn(e.service())
 	if err != nil {
 		return nil, err

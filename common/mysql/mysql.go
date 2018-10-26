@@ -7,7 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 
-	configor "a.com/go-server/common/configor"
+	"a.com/go-server/common/configor"
 )
 
 func Doit(db string, h func(*gorm.DB) error) error {
@@ -31,7 +31,6 @@ func InitMysql(conf configor.MysqlConfigor) error {
 			fmt.Println("Mysql数据库: ", db, "连接异常! ", err)
 			return err
 		}
-
 		orm.LogMode(true)
 		orm.DB().SetMaxIdleConns(conf.MaxIdle)
 		orm.DB().SetMaxOpenConns(conf.MaxOpen)
