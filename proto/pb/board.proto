@@ -28,94 +28,94 @@ service Board {
 // 评论Request
 
 message CommListArgs {
-    string object_id  = 1; 
-    string father_id  = 2;
+    string obj_id     = 1; // 对象id
+    string top_id     = 2; // 一级评论id
     string direct     = 3;
     string uid        = 4; // 请求用户的uid
     string page_token = 5;
 }
 
 message CommGetArgs {
-    string object_id = 1; // 对象id
+    string obj_id    = 1;
     string id        = 2; // 评论id
-    string uid       = 3; // 请求用户的uid
+    string uid       = 3;
 }
 
 message CommNewArgs {
-    string object_id     = 1; 
-    string father_id     = 2; // 父级评论id
+    string obj_id        = 1;
+    string top_id        = 2;
     int32  level         = 3;
     bool   is_repost     = 4;
     string content       = 5;
-    string photo_id      = 6;
-    string photo_ex      = 7;
+    string img_id        = 6;
+    string img_ex        = 7;
     UserBaseInfo author  = 8;
 }
 
 message CommDelArgs {
-    string object_id   = 1;
-    string father_id   = 2;
+    string obj_id      = 1;
+    string top_id      = 2;
     string id          = 3;
     string uid         = 4; // 请求用户的uid
 }
 
 message CommLikeArgs {
-    string object_id = 1; // 对象id
+    string obj_id    = 1; // 对象id
     string id        = 2; // 评论id
     string uid       = 3; // 请求用户的uid
 }
 
 message CommUnLikeArgs {
-    string object_id = 1; // 对象id
+    string obj_id    = 1; // 对象id
     string id        = 2; // 评论id
     string uid       = 3; // 请求用户的uid
 }
 
 message LikeListArgs {
-    string object_id  = 1; 
+    string obj_id     = 1; 
     string page_token = 2;
 }
 
 message LikeGetArgs {
-    string object_id = 1; // 对象id
+    string obj_id    = 1; // 对象id
     string uid       = 2;
 }
 
 message LikeNewArgs {
-    string object_id     = 1; 
+    string obj_id        = 1; 
     UserBaseInfo author  = 2;
 }
 
 message LikeDelArgs {
-    string object_id = 1; // 对象id
+    string obj_id    = 1; // 对象id
     string uid       = 2;
 }
 
 message BoardSumGetArgs {
-    string object_id = 1; // 对象id
+    string obj_id = 1; // 对象id
 }
 
 message BoardSumMGetArgs {
-    repeated string object_ids = 1;
+    repeated string obj_ids = 1;
 }
 
 // 评论Response
 
 message CommentInfo {
-    string id            = 1;
-    string object_id     = 2;
-    string father_id     = 3;
-    string content       = 4;
-    string photo_id      = 5;
-    string photo_ex      = 6;
-    int32  level         = 7;
-    bool   is_repost     = 8;
-    bool   is_liking     = 9;
-    int32  likes_count   = 10;
-    int32  reply_count   = 11;
-    int64  created_at    = 12;
+    string id          = 1;
+    string obj_id      = 2;
+    string top_id      = 3;
+    string content     = 4;
+    string img_id      = 5;
+    string img_ex      = 6;
+    int32  level       = 7;
+    bool   is_repost   = 8;
+    bool   is_liking   = 9;
+    int32  likes_count = 10;
+    int32  reply_count = 11;
+    int64  created_at  = 12;
 
-    UserBaseInfo  author = 13;
+    UserBaseInfo         author = 13;
     repeated CommentInfo replys = 14;
 }
 
@@ -125,20 +125,20 @@ message CommentInfos {
 }
 
 message LikeInfo {
-    string id            = 1;
-    string object_id     = 2;
+    string        id     = 1;
+    string        obj_id = 2;
     UserBaseInfo  author = 3;
 }
 
 message LikeInfos {
-    repeated LikeInfo   items = 1;
-    string   page_token       = 2;
+    repeated LikeInfo items      = 1;
+    string            page_token = 2;
 }
 
 message BoardSumInfo {
-    string object_id    = 1;
-    int32  comms_top    = 2; // 一级评论数
-    int32  comms_total  = 3; //   总评论数
+    string obj_id       = 1;
+    int32  comms_total  = 2; //   总评论数
+    int32  comms_top    = 3; // 一级评论数
     int32  likes_total  = 4; //   总点赞数
     int32  repost_total = 5; //   总转发数
 }

@@ -1,7 +1,7 @@
 package json
 
 type Base struct {
-	ID        string `json: "id"`
+	Id        string `json: "id"`
 	State     int    `json: "state"`
 	CreatedAt int64  `json: "created_at"`
 	UpdatedAt int64  `json: "updated_at"`
@@ -14,6 +14,6 @@ type Geo struct {
 }
 
 type Image struct {
-	ImgID  string `json:"img_id"`
-	ImgExt string `json:"img_ext"`
+	ImgId string `json:"img_id"`
+	ImgEx string `json:"img_ex"`
 }
