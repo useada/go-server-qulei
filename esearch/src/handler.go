@@ -20,8 +20,7 @@ func (s *SvrHandler) SearchByName(ctx context.Context,
 	in *pb.SearchNameArgs) (*pb.SearchUserInfos, error) {
 	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
 
-	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
-	ptok := page.PageToken{Offset: 0, Limit: 20}
+	ptok := page.PageToken{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
@@ -45,8 +44,7 @@ func (s *SvrHandler) SearchByNear(ctx context.Context,
 	in *pb.SearchNearArgs) (*pb.SearchUserInfos, error) {
 	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
 
-	// 解析page_token 因为第一次page_token为空串 设置好初始默认值
-	ptok := page.PageToken{Offset: 0, Limit: 20}
+	ptok := page.PageToken{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
