@@ -1,10 +1,5 @@
 package main
 
-const (
-	NORMAL_STATUS = 0
-	DELETE_STATUS = 1
-)
-
 type CommRecord struct {
 	Id    string `json:"id" bson:"_id,omitempty"`
 	Oid   string `json:"oid" bson:"oid"`
@@ -25,7 +20,7 @@ type CommRecord struct {
 	ReplyCount int64 `json:"reply_count" bson:"reply_count"`
 	CreatedAt  int64 `json:"created_at" bson:"created_at"`
 
-	LatestReplys []CommRecord `json:"latest_replys" bson:"latest_replys"`
+	Replys []CommRecord `json:"replys" bson:"replys"` // 露出两条二级评论
 }
 
 type CommRecordList []CommRecord
@@ -43,10 +38,10 @@ func (c CommRecordList) Swap(i, j int) {
 }
 
 type CommLikeRecord struct {
-	Id        string `json:"id" bson:"_id,omitempty"`
+	Id        string `json:"id" bson:"_id,omitempty"` // Id = cid + uid
 	Oid       string `json:"oid" bson:"oid"`
 	Uid       string `json:"uid" bson:"uid"`
-	CommentId string `json:"comment_id" bson:"comment_id"`
+	Cid       string `json:"cid" bson:"cid"`
 	CreatedAt int64  `json:"created_at" bson:"created_at"`
 }
 

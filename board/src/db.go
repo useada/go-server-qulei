@@ -85,32 +85,57 @@ func (db *DBHandle) NewComment(item CommRecord) error {
 
 func (db *DBHandle) DelComment(id string) error {
 	handle := func(c *mgo.Collection) error {
-		return c.Update(bson.M{"_id": id},
-			bson.M{"$set": bson.M{"status": DELETE_STATUS}})
+		return c.Remove(bson.M{"_id": id})
 	}
 	return mongo.Doit("Comment", "comment", handle)
 }
 
-func (db *DBHandle) IncrCommReply(id string) error {
-	return nil
-}
-
-func (db *DBHandle) DecrCommReply(id string) error {
-	return nil
-}
-
-func (db *DBHandle) IncrCommLike(id string) error {
+func (db *DBHandle) IncrCommReply(cid string, item CommRecord) error {
 	handle := func(c *mgo.Collection) error {
+		replys := bson.M{"$each": CommRecordList{item},
+			"$sort": "-created_at", "$slice": 3}
 		return c.Update(bson.M{"_id": id},
+			bson.M{"$push": bson.M{"replys": replys},
+				"$inc": bson.M{"reply_count": 1}})
+	}
+	return mongo.Doit("Comment", "comment", handle)
+}
+
+func (db *DBHandle) DecrCommReply(cid, rid string) error {
+	handle := func(c *mgo.Collection) error {
+		return c.Update(bson.M{"_id": cid},
+			bson.M{"$pull": bson.M{"replys": bson.M{"_id": rid}},
+				"$inc": bson.M{"reply_count": -1}})
+	}
+	return mongo.Doit("Comment", "comment", handle)
+}
+
+func (db *DBHandle) IncrCommLike(cid string) error {
+	handle := func(c *mgo.Collection) error {
+		return c.Update(bson.M{"_id": cid},
 			bson.M{"$inc": bson.M{"likes_count": 1}})
 	}
 	return mongo.Doit("Comment", "comment", handle)
 }
 
-func (db *DBHandle) DecrCommLike(id string) error {
+func (db *DBHandle) DecrCommLike(cid string) error {
 	handle := func(c *mgo.Collection) error {
-		return c.Update(bson.M{"_id": id},
+		return c.Update(bson.M{"_id": cid},
 			bson.M{"$inc": bson.M{"likes_count": -1}})
 	}
 	return mongo.Doit("Comment", "comment", handle)
+}
+
+func (db *DBHandle) NewCommLike(item CommLikeRecord) error {
+	handle := func(c *mgo.Collection) error {
+		return c.Insert(item)
+	}
+	return mongo.Doit("Comment", "like", handle)
+}
+
+func (db *DBHandle) DelCommLike(id string) error {
+	handle := func(c *mgo.Collection) error {
+		return c.Remove(bson.M{"_id": id})
+	}
+	return mongo.Doit("Comment", "like", handle)
 }
