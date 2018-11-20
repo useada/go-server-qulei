@@ -1,11 +1,17 @@
 ```
+import (
+    "a.com/go-server/common/mysql"
+)
+
 // 全局初始化调用一次
-if err := mysql.InitMysql(conf); err != nil {
-    panic(err)
+func init() {
+    if err := mysql.Init(conf); err != nil {
+        panic(err)
+    }
 }
 
 // 使用示例
-func GetData(state int) ([]TmpData, error) {
+func DemoGetMysqlData(state int) ([]TmpData, error) {
     items := []TmpData{}
     handle := func(orm *gorm.DB) error {
         return orm.Where("state=?", state).Find(&items).Error

@@ -18,35 +18,26 @@ var UnlockScript = redis.NewScript(1, `
 `)
 
 func TryLock(s string, ttl int64) (string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return "", errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
 	ticket := fmt.Sprintf("%s%d", s, time.Now().UnixNano())
-	res, err := conn.Do("SET", key(s), ticket, "PX", ttl, "NX")
-	if err != nil {
-		return "", err
+	handle := func(conn redis.Conn) error {
+		res, err := conn.Do("SET", key(s), ticket, "PX", ttl, "NX")
+		if res != "OK" {
+			return errors.New("Failed to acquire lock")
+		}
+		return err
 	}
-	if res != "OK" {
-		return "", errors.New("Failed to acquire lock")
-	}
-	return ticket, nil
+	return ticket, Doit(handle)
 }
 
 func UnLock(s, ticket string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+	handle := func(conn redis.Conn) error {
+		ret, err := UnlockScript.Do(conn, key(s), ticket)
+		if ret == 0 {
+			return errors.New("unlock script failed")
+		}
+		return err
 	}
-	defer conn.Close()
-
-	ret, err := UnlockScript.Do(conn, key(s), ticket)
-	if ret == 0 {
-		return errors.New("unlock script failed")
-	}
-	return err
+	return Doit(handle)
 }
 
 func key(s string) string {

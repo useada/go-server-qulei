@@ -28,7 +28,7 @@ func init() {
 		panic(err)
 	}
 
-	if err := gclient.InitGrpcs(Conf.Grpc.Consul, Conf.Grpc.Services); err != nil {
+	if err := gclient.Init(Conf.Grpc.Consul, Conf.Grpc.Services); err != nil {
 		panic(err)
 	}
 	fmt.Println(Conf.Grpc.Consul, Conf.Grpc.Services)

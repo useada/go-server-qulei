@@ -12,7 +12,7 @@ import (
 
 var GrpcConns map[string]*grpc.ClientConn
 
-func InitGrpcs(consul string, services []string) error {
+func Init(consul string, services []string) error {
 	if len(consul) == 0 || len(services) == 0 {
 		return errors.New("consul or services empty")
 	}

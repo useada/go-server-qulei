@@ -5,10 +5,17 @@
 
 // Grpc Server Register
 ```
-consul.RegisterGrpcHealth(svr)
-
-crg := consul.NewConsulRegister(Conf.Consul.Host, Conf.Server.Name, Conf.Server.Port)
-if err := crg.Register(locip); err != nil {
-    panic(err)                 
+func main() {
+  .
+  .
+  .
+	if err := consul.NewConsulRegister(Conf.Consul).
+		Register(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
+		panic(err)
+	}
+    consul.RegisterGrpcHealth(svr)
+ .
+ .
+ .
 }
 ```

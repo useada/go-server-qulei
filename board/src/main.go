@@ -32,11 +32,11 @@ func init() {
 		panic(err)
 	}
 
-	if err := mongo.InitMongo(Conf.Mongo); err != nil {
+	if err := mongo.Init(Conf.Mongo); err != nil {
 		panic(err)
 	}
 
-	redis.InitRedis(Conf.Redis)
+	redis.Init(Conf.Redis)
 
 	var err error
 	if LocIP, err = locip.GetLocalIP(); err != nil {

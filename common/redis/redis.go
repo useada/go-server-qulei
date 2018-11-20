@@ -27,114 +27,65 @@ func GetBytes(key string) ([]byte, error) {
 	return redis.Bytes(Get(key))
 }
 
-func Get(key string) (interface{}, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
+func Get(key string) (res interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		res, err = conn.Do("GET", key)
+		return err
 	}
-	defer conn.Close()
-
-	return conn.Do("GET", key)
+	return res, Doit(handle)
 }
 
-func Set(key string, val interface{}) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func Set(key string, val interface{}, ttl int64) (err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{key, val}
+		if ttl > 0 {
+			args = append(args, "EX", ttl)
+		}
+		_, err = conn.Do("SET", args)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("SET", key, val)
-	return err
+	return Doit(handle)
 }
 
-func SetTTL(key string, val interface{}, ttl int64) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func IncrBy(key string, val int64) (ret int64, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int64(conn.Do("INCRBY", key, val))
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("SET", key, val, "EX", ttl)
-	return err
+	return ret, Doit(handle) // ret:INCRBY之后的值
 }
 
-func Incr(key string, val int) (int, error) {
-	conn := GetConn()
-	if nil == conn {
-		return 0, errors.New("get redis conn failed")
+func DecrBy(key string, val int64) (ret int64, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int64(conn.Do("DECRBY", key, val))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Int(conn.Do("INCRBY", key, val))
-}
-
-func Decr(key string, val int) (int, error) {
-	conn := GetConn()
-	if nil == conn {
-		return 0, errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	return redis.Int(conn.Do("DECRBY", key, val))
+	return ret, Doit(handle) // ret:DECRBY之后的值
 }
 
 func MGetBytes(keys []string) ([][]byte, error) {
 	return redis.ByteSlices(MGet(keys))
 }
 
-func MGet(keys []string) (interface{}, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	args := make([]interface{}, 0)
-	for _, key := range keys {
-		args = append(args, key)
-	}
-	return conn.Do("MGET", args...)
-}
-
-func MSetBytes(keys []string, vals [][]byte) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	for idx, key := range keys {
-		conn.Send("SET", key, vals[idx])
-	}
-	if err := conn.Flush(); err != nil {
+func MGet(keys []string) (res interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		args := make([]interface{}, 0)
+		for _, key := range keys {
+			args = append(args, key)
+		}
+		res, err = conn.Do("MGET", args...)
 		return err
 	}
-
-	for range keys {
-		conn.Receive()
-	}
-	return nil
+	return res, Doit(handle)
 }
 
-func MSetBytesTTL(keys []string, vals [][]byte, ttl int64) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	for idx, key := range keys {
-		conn.Send("SET", key, vals[idx], "EX", ttl)
-	}
-	if err := conn.Flush(); err != nil {
+// args:  [key1, val1, key2, val2, ...]
+func MSet(args []interface{}) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("MSET", args)
 		return err
 	}
-
-	for range keys {
-		conn.Receive()
-	}
-	return nil
+	return Doit(handle)
 }
 
 // -- Hash
@@ -158,47 +109,36 @@ func HGetByteSlices(hkey, key string) ([][]byte, error) {
 	return redis.ByteSlices(HGet(hkey, key))
 }
 
-func HGet(hkey string, key string) (interface{}, error) {
-	conn := GetConn()
-	if nil == conn {
-		return "", errors.New("get redis conn failed")
+func HGet(hkey string, key string) (res interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		res, err = conn.Do("HGET", hkey, key)
+		return err
 	}
-	defer conn.Close()
-
-	return conn.Do("HGET", hkey, key)
+	return res, Doit(handle)
 }
 
-func HSet(hkey string, key string, val interface{}) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func HSet(hkey string, key string, val interface{}) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("HSET", hkey, key, val)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("HSET", hkey, key, val)
-	return err
+	return Doit(handle)
 }
 
-func HDel(hkey, key string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func HDel(hkey, key string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("HDEL", hkey, key)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("HDEL", hkey, key)
-	return err
+	return Doit(handle)
 }
 
-func HIncr(hkey string, key string, val int) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func HIncrBy(hkey string, key string, val int64) (ret int64, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int64(conn.Do("HINCRBY", hkey, key, val))
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("HINCRBY", hkey, key, val)
-	return err
+	return ret, Doit(handle)
 }
 
 func HMGetStrings(hkey string, keys []string) ([]string, error) {
@@ -209,264 +149,209 @@ func HMGetBytes(hkey string, keys []string) ([][]byte, error) {
 	return redis.ByteSlices(HMGet(hkey, keys))
 }
 
-func HMGet(hkey string, keys []string) (interface{}, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
+func HMGet(hkey string, keys []string) (res interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{hkey}
+		for _, key := range keys {
+			args = append(args, key)
+		}
+		res, err = conn.Do("HMGET", args...)
+		return err
 	}
-	defer conn.Close()
-
-	args := []interface{}{hkey}
-	for _, key := range keys {
-		args = append(args, key)
-	}
-	return conn.Do("HMGET", args...)
+	return res, Doit(handle)
 }
 
-// vals:  [key1 val1 key2 val2 ...]
-func HMSet(hkey string, vals []interface{}) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+// vals:  [key1, val1, key2, val2, ...]
+func HMSet(hkey string, vals []interface{}) (err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{hkey}
+		args = append(args, vals...)
+		_, err = conn.Do("HMSET", args...)
+		return err
 	}
-	defer conn.Close()
-
-	args := []interface{}{hkey}
-	args = append(args, vals...)
-
-	_, err := conn.Do("HMSET", args...)
-	return err
+	return Doit(handle)
 }
 
-func HGetAll(hkey string) (interface{}, error) {
-	conn := GetConn()
-	if nil == conn {
-		return 0, errors.New("get redis conn failed")
+// 效率原因, 不建议使用
+func HGetAll(hkey string) (res interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		res, err = conn.Do("HGETALL", hkey)
+		return err
 	}
-	defer conn.Close()
-
-	return conn.Do("HGETALL", hkey)
+	return res, Doit(handle)
 }
 
-func HExists(hkey, key string) (bool, error) {
-	conn := GetConn()
-	if nil == conn {
-		return false, errors.New("get redis conn failed")
+func HExists(hkey, key string) (ret int, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int(conn.Do("HEXISTS", hkey, key))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Bool(conn.Do("HEXISTS", hkey, key))
+	return ret, Doit(handle) // 0:不存在 1:存在 (err != nil, ret == 0)
 }
 
 // --Set
-func SAdd(skey, member string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func SAdd(skey, member string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("SADD", skey, member)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("SADD", skey, member)
-	return err
+	return Doit(handle)
 }
 
-func SExist(skey, member string) bool {
-	conn := GetConn()
-	if nil == conn {
-		return false
+func SIsMember(skey, member string) (ret int, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int(conn.Do("SISMEMBER", skey, member))
+		return err
 	}
-	defer conn.Close()
-
-	ret, _ := redis.Int(conn.Do("SISMEMBER", skey, member))
-	return ret > 0
+	return ret, Doit(handle) // 0:不存在 1:存在 (err != nil, ret == 0)
 }
 
-func SRem(skey, member string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func SRem(skey, member string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("SREM", skey, member)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("SREM", skey, member)
-	return err
+	return Doit(handle)
 }
 
 // --Sorted Set
-func ZAdd(zkey string, score int64, member string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func ZAdd(zkey string, score int64, member string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("ZADD", zkey, score, member)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("ZADD", zkey, score, member)
-	return err
+	return Doit(handle)
 }
 
-// val: [score1, member1, score2, member2 ...]
-func ZMAdd(zkey string, vals []interface{}) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+// vals: [score1, member1, score2, member2, ...]
+func ZMAdd(zkey string, vals []interface{}) (err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{zkey}
+		args = append(args, vals...)
+		_, err = conn.Do("ZADD", args...)
+		return err
 	}
-	defer conn.Close()
-
-	args := []interface{}{zkey}
-	args = append(args, vals...)
-
-	_, err := conn.Do("ZADD", args...)
-	return err
+	return Doit(handle)
 }
 
-func ZScore(zkey string, member string) (int64, error) {
-	conn := GetConn()
-	if nil == conn {
-		return 0, errors.New("get redis conn failed")
+func ZScore(zkey string, member string) (score int64, err error) {
+	handle := func(conn redis.Conn) error {
+		score, err = redis.Int64(conn.Do("ZSCORE", zkey, member))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Int64(conn.Do("ZSCORE", zkey, member))
+	return score, Doit(handle)
 }
 
-func ZRangeByScore(zkey string, beg, end int64) ([]string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
+func ZRangeByScore(zkey string, beg, end int64, limit int) (items []string, err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{zkey, beg, end}
+		if limit > 0 {
+			args = append(args, "limit", 0, limit)
+		}
+		items, err = redis.Strings(conn.Do("ZRANGEBYSCORE", args))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Strings(conn.Do("ZRANGEBYSCORE", zkey, beg, end))
+	return items, Doit(handle)
 }
 
-func ZRangeByScoreLimit(zkey string, beg, end int64, limit int) ([]string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
+func ZRevRangeByScore(zkey string, beg, end int64, limit int) (items []string, err error) {
+	handle := func(conn redis.Conn) error {
+		args := []interface{}{zkey, beg, end}
+		if limit > 0 {
+			args = append(args, "limit", 0, limit)
+		}
+		items, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", args))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Strings(conn.Do("ZRANGEBYSCORE",
-		zkey, beg, end, "limit", 0, limit))
-}
-
-func ZRevRangeByScore(zkey string, beg, end int64) ([]string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	return redis.Strings(conn.Do("ZRANGEBYSCORE", zkey, beg, end))
-}
-
-func ZRevRangeByScoreLimit(zkey string, beg, end int64, limit int) ([]string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return nil, errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	return redis.Strings(conn.Do("ZREVRANGEBYSCORE",
-		zkey, beg, end, "limit", 0, limit))
+	return items, Doit(handle)
 }
 
 func ZRemRangeByScore(zkey string, beg, end int64) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+	handle := func(conn redis.Conn) error {
+		_, err := conn.Do("ZREMRANGEBYSCORE", zkey, beg, end)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("ZREMRANGEBYSCORE", zkey, beg, end)
-	return err
+	return Doit(handle)
 }
 
-func ZRem(zkey, member string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func ZRem(zkey, member string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("ZREM", zkey, member)
+		return err
 	}
-	defer conn.Close()
-
-	_, err := conn.Do("ZREM", zkey, member)
-	return err
+	return Doit(handle)
 }
 
 // --List
-func LPop(lkey string) (string, error) {
-	conn := GetConn()
-	if nil == conn {
-		return "", errors.New("get redis conn failed")
-	}
-	defer conn.Close()
-
-	return redis.String(conn.Do("LPOP", lkey))
+func LPopString(lkey string) (val string, err error) {
+	return redis.String(LPop(lkey))
 }
 
-func RPush(lkey string, val string) error {
-	conn := GetConn()
-	if nil == conn {
-		return errors.New("get redis conn failed")
+func LPop(lkey string) (val interface{}, err error) {
+	handle := func(conn redis.Conn) error {
+		val, err = conn.Do("LPOP", lkey)
+		return err
 	}
-	defer conn.Close()
+	return val, Doit(handle)
+}
 
-	_, err := conn.Do("RPUSH", lkey, val)
-	return err
+func RPush(lkey string, val interface{}) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("RPUSH", lkey, val)
+		return err
+	}
+	return Doit(handle)
 }
 
 // --keys
-func Exist(key string) (int, error) {
-	conn := GetConn()
-	if nil == conn {
-		return -1, errors.New("get redis conn failed")
+func Exist(key string) (ret int, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int(conn.Do("EXISTS", key))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Int(conn.Do("EXISTS", key))
+	return ret, Doit(handle) // 1:存在 0:不存在
 }
 
-func Expire(key string, ttl int) (int, error) {
-	conn := GetConn()
-	if nil == conn {
-		return -1, errors.New("get redis conn failed")
+func Expire(key string, ttl int) (ret int, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int(conn.Do("EXPIRE", key, ttl))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Int(conn.Do("EXPIRE", key, ttl))
+	return ret, Doit(handle) // 1:成功 0:失败
 }
 
-func KeyTTL(key string) (int, error) {
-	conn := GetConn()
-	if nil == conn {
-		return -1, errors.New("get redis conn failed")
+func KeyTTL(key string) (ret int, err error) {
+	handle := func(conn redis.Conn) error {
+		ret, err = redis.Int(conn.Do("TTL", key))
+		return err
 	}
-	defer conn.Close()
-
-	return redis.Int(conn.Do("TTL", key))
+	return ret, Doit(handle) // -2:key不存在 -1:没有设置TTL num:剩余生存时间(秒)
 }
 
-func Delete(key string) error {
-	conn := GetConn()
+func Delete(key string) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("DEL", key)
+		return err
+	}
+	return Doit(handle)
+}
+
+// --
+
+func Doit(h func(redis.Conn) error) error {
+	conn := gRedigo.Get()
 	if nil == conn {
 		return errors.New("get redis conn failed")
 	}
 	defer conn.Close()
-
-	_, err := conn.Do("DEL", key)
-	return err
+	return h(conn)
 }
 
-// --
-func GetConn() redis.Conn {
-	return gRedisPool.Get()
-}
+var gRedigo *redis.Pool
 
-var gRedisPool *redis.Pool
-
-func InitRedis(conf configor.RedisConfigor) {
+func Init(conf configor.RedisConfigor) {
 	fmt.Println("初始化Redis连接池")
-	gRedisPool = &redis.Pool{
+	gRedigo = &redis.Pool{
 		MaxIdle:   conf.MaxIdle,
 		MaxActive: conf.MaxIdle * 100,
 		Dial: func() (redis.Conn, error) {

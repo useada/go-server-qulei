@@ -6,10 +6,7 @@ import (
 )
 
 func GetLocalIP() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
+	addrs, _ := net.InterfaceAddrs()
 	for _, addr := range addrs {
 		ipnet, ok := addr.(*net.IPNet)
 		if !ok || ipnet.IP.IsLoopback() {

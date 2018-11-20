@@ -20,7 +20,7 @@ func Doit(db string, h func(*gorm.DB) error) error {
 
 var gGorm map[string]*gorm.DB
 
-func InitMysql(conf configor.MysqlConfigor) error {
+func Init(conf configor.MysqlConfigor) error {
 	gGorm = make(map[string]*gorm.DB)
 	for _, db := range conf.Database {
 		dst := fmt.Sprintf("%s@tcp(%s)/%s", conf.Auth, conf.Host, db)

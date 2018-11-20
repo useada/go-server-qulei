@@ -37,7 +37,7 @@ func init() {
 		panic(err)
 	}
 
-	if err := mysql.InitMysql(Conf.Mysql); err != nil {
+	if err := mysql.Init(Conf.Mysql); err != nil {
 		panic(err)
 	}
 

@@ -6,7 +6,7 @@ package pb;
  
 service Board {
     // 评论
-    rpc ListTopComments(CommListArgs) returns (CommentInfos) {}   // 拉取对象的一级评论列表
+    rpc ListFirstComments(CommListArgs) returns (CommentInfos) {} // 拉取对象的一级评论列表
     rpc ListChildComments(CommListArgs) returns (CommentInfos) {} // 拉取一级评论的二级评论列表
     rpc GetComment(CommGetArgs) returns (CommentInfo) {}          // 获取评论
     rpc NewComment(CommNewArgs) returns (CommentInfo) {}          // 创建评论
@@ -21,94 +21,89 @@ service Board {
     rpc DelLike(LikeDelArgs) returns (ReplyBaseInfo) {} // 删除点赞
 
     // 对象的评论点赞汇总信息
-    rpc GetSum(BoardSumGetArgs) returns (BoardSumInfo) {}
-    rpc MGetSum(BoardSumMGetArgs) returns (BoardSumInfos) {}
+    rpc GetsSummary(BoardSummaryArgs) returns (BoardSummaryInfos) {}
 }
 
 // 评论Request
 
 message CommListArgs {
-    string obj_id     = 1; // 对象id
-    string top_id     = 2; // 一级评论id
+    string oid        = 1; // 对象id
+    string cid        = 2; // 一级评论id
     string direct     = 3;
     string uid        = 4; // 请求用户的uid
     string page_token = 5;
 }
 
 message CommGetArgs {
-    string obj_id    = 1;
-    string id        = 2; // 评论id
-    string uid       = 3;
+    string id  = 1; // 评论id
+    string oid = 2;
+    string uid = 3;
 }
 
 message CommNewArgs {
-    string obj_id        = 1;
-    string top_id        = 2;
-    int32  level         = 3;
-    bool   is_repost     = 4;
-    string content       = 5;
-    string img_id        = 6;
-    string img_ex        = 7;
-    UserBaseInfo author  = 8;
+    string oid          = 1;
+    string cid          = 2; // 一级评论id
+    int32  level        = 3;
+    bool   is_repost    = 4;
+    string content      = 5;
+    string img_id       = 6;
+    string img_ex       = 7;
+    UserBaseInfo author = 8;
 }
 
 message CommDelArgs {
-    string obj_id      = 1;
-    string top_id      = 2;
-    string id          = 3;
-    string uid         = 4; // 请求用户的uid
+    string id  = 1;
+    string oid = 2;
+    string cid = 3;
+    string uid = 4; // 请求用户的uid
 }
 
 message CommLikeArgs {
-    string obj_id    = 1; // 对象id
-    string id        = 2; // 评论id
-    string uid       = 3; // 请求用户的uid
+    string id  = 1; // 评论id
+    string oid = 2; // 对象id
+    string uid = 3; // 请求用户的uid
 }
 
 message CommUnLikeArgs {
-    string obj_id    = 1; // 对象id
-    string id        = 2; // 评论id
-    string uid       = 3; // 请求用户的uid
+    string id  = 1; // 评论id
+    string oid = 2; // 对象id
+    string uid = 3; // 请求用户的uid
 }
 
 message LikeListArgs {
-    string obj_id     = 1; 
+    string oid        = 1; 
     string page_token = 2;
 }
 
 message LikeGetArgs {
-    string obj_id    = 1; // 对象id
-    string uid       = 2;
+    string oid = 1; // 对象id
+    string uid = 2;
 }
 
 message LikeNewArgs {
-    string obj_id        = 1; 
+    string oid           = 1; 
     UserBaseInfo author  = 2;
 }
 
 message LikeDelArgs {
-    string obj_id    = 1; // 对象id
-    string uid       = 2;
+    string oid = 1; // 对象id
+    string uid = 2;
 }
 
-message BoardSumGetArgs {
-    string obj_id = 1; // 对象id
-}
-
-message BoardSumMGetArgs {
-    repeated string obj_ids = 1;
+message BoardSummaryArgs {
+    repeated string oids = 1;
 }
 
 // 评论Response
 
 message CommentInfo {
     string id          = 1;
-    string obj_id      = 2;
-    string top_id      = 3;
-    string content     = 4;
-    string img_id      = 5;
-    string img_ex      = 6;
-    int32  level       = 7;
+    string oid         = 2;
+    string cid         = 3; // 一级评论id;
+    int32  level       = 4;
+    string content     = 5;
+    string img_id      = 6;
+    string img_ex      = 7;
     bool   is_repost   = 8;
     bool   is_liking   = 9;
     int32  likes_count = 10;
@@ -126,7 +121,7 @@ message CommentInfos {
 
 message LikeInfo {
     string        id     = 1;
-    string        obj_id = 2;
+    string        oid    = 2;
     UserBaseInfo  author = 3;
 }
 
@@ -135,14 +130,14 @@ message LikeInfos {
     string            page_token = 2;
 }
 
-message BoardSumInfo {
-    string obj_id       = 1;
-    int32  comms_total  = 2; //   总评论数
-    int32  comms_top    = 3; // 一级评论数
-    int32  likes_total  = 4; //   总点赞数
-    int32  repost_total = 5; //   总转发数
+message BoardSummaryInfo {
+    string oid               = 1;
+    int32  comms_total       = 2; //   总评论数
+    int32  comms_first_total = 3; // 一级评论数
+    int32  likes_total       = 4; //   总点赞数
+    int32  repost_total      = 5; //   总转发数
 }
 
-message BoardSumInfos {
-    repeated BoardSumInfo items = 1;
+message BoardSummaryInfos {
+    repeated BoardSummaryInfo items = 1;
 }

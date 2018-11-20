@@ -22,7 +22,7 @@ func Doit(db, collect string, h func(*mgo.Collection) error) error {
 
 var gMgo map[string]*mgo.Session
 
-func InitMongo(conf configor.MongoConfigor) error {
+func Init(conf configor.MongoConfigor) error {
 	gMgo = make(map[string]*mgo.Session)
 	for _, db := range conf.Database {
 		addr := "mongodb://" + conf.Auth + conf.Host + db

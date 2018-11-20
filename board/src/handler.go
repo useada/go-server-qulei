@@ -14,7 +14,7 @@ func RegisterHandler(svr *grpc.Server) {
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) ListTopComments(ctx context.Context,
+func (s *SvrHandler) ListFirstComments(ctx context.Context,
 	in *pb.CommListArgs) (*pb.CommentInfos, error) {
 	return nil, nil
 }
@@ -69,12 +69,7 @@ func (s *SvrHandler) DelLike(ctx context.Context,
 	return nil, nil
 }
 
-func (s *SvrHandler) GetSum(ctx context.Context,
-	in *pb.BoardSumGetArgs) (*pb.BoardSumInfo, error) {
-	return nil, nil
-}
-
-func (s *SvrHandler) MGetSum(ctx context.Context,
-	in *pb.BoardSumMGetArgs) (*pb.BoardSumInfos, error) {
+func (s *SvrHandler) GetsSummary(ctx context.Context,
+	in *pb.BoardSummaryArgs) (*pb.BoardSummaryInfos, error) {
 	return nil, nil
 }

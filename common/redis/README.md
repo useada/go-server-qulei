@@ -1,9 +1,15 @@
 ```
+import (
+    "a.com/go-server/common/redis"
+)
+
 // 全局初始化调用一次
-redis.InitRedis(conf)
+func init() {
+    redis.Init(conf)
+}
 
 // 使用示例
-func GetData(key string) (string, error) {
+func DemoGetRedisData(key string) (string, error) {
     data, err := redis.GetBytes(key)
     if err != nil {
         return "", err
