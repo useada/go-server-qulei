@@ -1,5 +1,10 @@
 package main
 
+const (
+	COMMENT_LEVEL_FIRST = 1
+	COMMENT_LEVEL_CHILD = 2
+)
+
 type CommRecord struct {
 	Id    string `json:"id" bson:"_id,omitempty"`
 	Oid   string `json:"oid" bson:"oid"`
@@ -22,7 +27,6 @@ type CommRecord struct {
 
 	Replys []CommRecord `json:"replys" bson:"replys"` // 露出两条二级评论
 }
-
 type CommRecordList []CommRecord
 
 func (c CommRecordList) Len() int {
@@ -38,15 +42,16 @@ func (c CommRecordList) Swap(i, j int) {
 }
 
 type CommLikeRecord struct {
-	Id        string `json:"id" bson:"_id,omitempty"` // Id = cid + uid
+	Id        string `json:"id" bson:"_id,omitempty"` // Id = uid + cid
 	Oid       string `json:"oid" bson:"oid"`
 	Uid       string `json:"uid" bson:"uid"`
 	Cid       string `json:"cid" bson:"cid"`
 	CreatedAt int64  `json:"created_at" bson:"created_at"`
 }
+type CommLikeRecordList []CommLikeRecord
 
 type LikeRecord struct {
-	Id        string `json:"id" bson:"_id,omitempty"`
+	Id        string `json:"id" bson:"_id,omitempty"` // Id = uid + oid
 	Oid       string `json:"oid" bson:"oid"`
 	Uid       string `json:"uid" bson:"uid"`
 	Uname     string `json:"uname" bson:"uname"`
@@ -54,11 +59,13 @@ type LikeRecord struct {
 	AvatarEx  string `json:"avatar_ex" bson:"avatar_ex"`
 	CreatedAt int64  `json:"created_at" bson:"created_at"`
 }
+type LikeRecordList []LikeRecord
 
 type SumRecord struct {
-	Id          string `json:"id" bson:"_id,omitempty"`
-	CommsTotal  int    `json:"comms_total" bson:"comms_total"`
-	CommsTop    int    `json:"comms_top" bson:"comms_top"`
-	LikesTotal  int    `json:"likes_total" bson:"likes_total"`
-	RepostTotal int    `json:"repost_total" bson:"repost_total"`
+	Id              string `json:"id" bson:"_id,omitempty"` // Id = oid
+	CommsCount      int    `json:"comms_count" bson:"comms_count"`
+	CommsFirstCount int    `json:"comms_first_count" bson:"comms_first_count"`
+	LikesCount      int    `json:"likes_count" bson:"likes_count"`
+	RepostCount     int    `json:"repost_count" bson:"repost_count"`
 }
+type SumRecordList []SumRecord
