@@ -9,18 +9,18 @@ import (
 	"a.com/go-server/common/mongo"
 )
 
-type DBHandle struct {
+type DbHandle struct {
 }
 
-var DB = &DBHandle{}
+var DB = &DbHandle{}
 
 // -- Comment
 
-func (db *DBHandle) ListFirstComms(oid, direct string,
-	stamp int64, limit int) (CommRecordList, error) {
-	items := make(CommRecordList, 0)
+func (db *DbHandle) ListComments(oid, cid, direct string, stamp int64,
+	limit int) (CommentModels, error) {
+	items := make(CommentModels, 0)
 	handle := func(c *mgo.Collection) error {
-		query := bson.M{"oid": oid, "level": COMMENT_LEVEL_FIRST}
+		query := bson.M{"oid": oid, "cid": cid}
 		if len(direct) != 0 {
 			query["created_at"] = bson.M{"$" + direct: stamp} //$gt, $lt
 		}
@@ -35,58 +35,42 @@ func (db *DBHandle) ListFirstComms(oid, direct string,
 	return items, mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) ListChildComms(oid, cid, direct string,
-	stamp int64, limit int) (CommRecordList, error) {
-	items := make(CommRecordList, 0)
-	handle := func(c *mgo.Collection) error {
-		query := bson.M{"oid": oid, "level": COMMENT_LEVEL_CHILD, "cid": cid}
-		if len(direct) != 0 {
-			query["created_at"] = bson.M{"$" + direct: stamp} //$gt, $lt
-		}
-
-		if direct == "gt" || direct == "gte" {
-			return c.Find(query).Sort("created_at").Limit(limit).All(&items)
-		}
-
-		defer sort.Sort(items) // created_at升序返回
-		return c.Find(query).Sort("-created_at").Limit(limit).All(&items)
-	}
-	return items, mongo.Doit("BoardComment", "comment", handle)
-}
-
-func (db *DBHandle) MGetComments(ids []string) (CommRecordList, error) {
-	items := make(CommRecordList, 0)
+func (db *DbHandle) MutiGetComments(ids []string) (CommentModels, error) {
+	items := make(CommentModels, 0)
 	handle := func(c *mgo.Collection) error {
 		return c.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&items)
 	}
 	return items, mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) GetComment(id string) (CommRecord, error) {
-	item := CommRecord{}
+func (db *DbHandle) GetComment(id string) (*CommentModel, error) {
+	pitem := &CommentModel{}
 	handle := func(c *mgo.Collection) error {
-		return c.Find(bson.M{"_id": id}).One(&item)
+		return c.Find(bson.M{"_id": id}).One(pitem)
 	}
-	return item, mongo.Doit("BoardComment", "comment", handle)
+	return pitem, mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) NewComment(item CommRecord) error {
+func (db *DbHandle) NewComment(pitem *CommentModel) error {
 	handle := func(c *mgo.Collection) error {
-		return c.Insert(item)
+		return c.Insert(pitem)
 	}
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) DelComment(id string) error {
+func (db *DbHandle) DelComment(id string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Remove(bson.M{"_id": id})
 	}
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) IncrCommReply(cid string, item CommRecord) error {
+func (db *DbHandle) IncrCommReply(level int, cid string, pitem *CommentModel) error {
+	if level == LEVEL_COMM_FIRST || len(cid) == 0 {
+		return nil
+	}
 	handle := func(c *mgo.Collection) error {
-		replys := bson.M{"$each": CommRecordList{item},
+		replys := bson.M{"$each": CommentModels{*pitem},
 			"$sort": "-created_at", "$slice": 3}
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$push": bson.M{"replys": replys},
@@ -95,7 +79,10 @@ func (db *DBHandle) IncrCommReply(cid string, item CommRecord) error {
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) DecrCommReply(cid, rid string) error {
+func (db *DbHandle) DecrCommReply(level int, cid, rid string) error {
+	if level == LEVEL_COMM_FIRST || len(cid) == 0 {
+		return nil
+	}
 	handle := func(c *mgo.Collection) error {
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$pull": bson.M{"replys": bson.M{"_id": rid}},
@@ -104,7 +91,7 @@ func (db *DBHandle) DecrCommReply(cid, rid string) error {
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) IncrCommLike(cid string) error {
+func (db *DbHandle) IncrCommLike(cid string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$inc": bson.M{"likes_count": 1}})
@@ -112,7 +99,7 @@ func (db *DBHandle) IncrCommLike(cid string) error {
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) DecrCommLike(cid string) error {
+func (db *DbHandle) DecrCommLike(cid string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$inc": bson.M{"likes_count": -1}})
@@ -120,22 +107,22 @@ func (db *DBHandle) DecrCommLike(cid string) error {
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DBHandle) GetsUserCommLikes(uid string) (CommLikeRecordList, error) {
-	items := make(CommLikeRecordList, 0)
+func (db *DbHandle) ListUserCommLikes(uid string) (CommentLikeModels, error) {
+	items := make(CommentLikeModels, 0)
 	handle := func(c *mgo.Collection) error {
 		return c.Find(bson.M{"uid": uid}).Sort("-created_at").Limit(500).All(&items)
 	}
 	return items, mongo.Doit("BoardComment", "like", handle)
 }
 
-func (db *DBHandle) NewCommLike(item CommLikeRecord) error {
+func (db *DbHandle) NewCommLike(pitem *CommentLikeModel) error {
 	handle := func(c *mgo.Collection) error {
-		return c.Insert(item)
+		return c.Insert(pitem)
 	}
 	return mongo.Doit("BoardComment", "like", handle)
 }
 
-func (db *DBHandle) DelCommLike(id string) error {
+func (db *DbHandle) DelCommLike(id string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Remove(bson.M{"_id": id})
 	}
@@ -144,9 +131,9 @@ func (db *DBHandle) DelCommLike(id string) error {
 
 // -- Like
 
-func (db *DBHandle) ListLikes(oid string,
-	stamp int64, limit int) (LikeRecordList, error) {
-	items := make(LikeRecordList, 0)
+func (db *DbHandle) ListLikes(oid string, stamp int64,
+	limit int) (LikeModels, error) {
+	items := make(LikeModels, 0)
 	handle := func(c *mgo.Collection) error {
 		query := bson.M{"oid": oid}
 		if stamp != 0 {
@@ -157,8 +144,8 @@ func (db *DBHandle) ListLikes(oid string,
 	return items, mongo.Doit("BoardLike", "like", handle)
 }
 
-func (db *DBHandle) GetsUserLikes(uid string) (LikeRecordList, error) {
-	items := make(LikeRecordList, 0)
+func (db *DbHandle) ListUserLikes(uid string) (LikeModels, error) {
+	items := make(LikeModels, 0)
 	handle := func(c *mgo.Collection) error {
 		query := bson.M{"uid": uid}
 		return c.Find(query).Sort("-created_at").Limit(500).All(&items)
@@ -166,22 +153,22 @@ func (db *DBHandle) GetsUserLikes(uid string) (LikeRecordList, error) {
 	return items, mongo.Doit("BoardLike", "like", handle)
 }
 
-func (db *DBHandle) GetLike(id string) (LikeRecord, error) {
-	item := LikeRecord{}
+func (db *DbHandle) GetLike(id string) (*LikeModel, error) {
+	pitem := &LikeModel{}
 	handle := func(c *mgo.Collection) error {
-		return c.Find(bson.M{"_id": id}).One(&item)
+		return c.Find(bson.M{"_id": id}).One(pitem)
 	}
-	return item, mongo.Doit("BoardLike", "like", handle)
+	return pitem, mongo.Doit("BoardLike", "like", handle)
 }
 
-func (db *DBHandle) NewLike(item LikeRecord) error {
+func (db *DbHandle) NewLike(pitem *LikeModel) error {
 	handle := func(c *mgo.Collection) error {
-		return c.Insert(item)
+		return c.Insert(pitem)
 	}
 	return mongo.Doit("BoardLike", "like", handle)
 }
 
-func (db *DBHandle) DelLike(id string) error {
+func (db *DbHandle) DelLike(id string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Remove(bson.M{"_id": id})
 	}
@@ -190,26 +177,26 @@ func (db *DBHandle) DelLike(id string) error {
 
 // -- Summary
 
-func (db *DBHandle) MGetsSummary(ids []string) (SumRecordList, error) {
-	items := make(SumRecordList, 0)
+func (db *DbHandle) MutiGetSummary(ids []string) (SummaryModels, error) {
+	items := make(SummaryModels, 0)
 	handle := func(c *mgo.Collection) error {
 		return c.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&items)
 	}
 	return items, mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) GetSummary(id string) (SumRecord, error) {
-	item := SumRecord{}
+func (db *DbHandle) GetSummary(id string) (*SummaryModel, error) {
+	pitem := &SummaryModel{}
 	handle := func(c *mgo.Collection) error {
-		return c.Find(bson.M{"_id": id}).One(&item)
+		return c.Find(bson.M{"_id": id}).One(pitem)
 	}
-	return item, mongo.Doit("BoardSummary", "summary", handle)
+	return pitem, mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) IncrSummaryComm(id string, level int) error {
+func (db *DbHandle) IncrSummaryComm(level int, id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"comms_count": 1}}
-		if level == COMMENT_LEVEL_FIRST {
+		if level == LEVEL_COMM_FIRST {
 			data["$inc"] = bson.M{"comms_count": 1, "comms_first_count": 1}
 		}
 		_, err := c.Upsert(bson.M{"_id": id}, data)
@@ -218,18 +205,18 @@ func (db *DBHandle) IncrSummaryComm(id string, level int) error {
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) DecrSummaryComm(id string, level, n int) error {
+func (db *DbHandle) DecrSummaryComm(level int, id string, count int) error {
 	handle := func(c *mgo.Collection) error {
-		data := bson.M{"$inc": bson.M{"comms_count": -n}}
-		if level == COMMENT_LEVEL_FIRST {
-			data["$inc"] = bson.M{"comms_count": -n, "comms_first_count": -1}
+		data := bson.M{"$inc": bson.M{"comms_count": -count}}
+		if level == LEVEL_COMM_FIRST {
+			data["$inc"] = bson.M{"comms_count": -count, "comms_first_count": -1}
 		}
 		return c.Update(bson.M{"_id": id}, data)
 	}
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) IncrSummaryLike(id string) error {
+func (db *DbHandle) IncrSummaryLike(id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"likes_count": 1}}
 		_, err := c.Upsert(bson.M{"_id": id}, data)
@@ -238,7 +225,7 @@ func (db *DBHandle) IncrSummaryLike(id string) error {
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) DecrSummaryLike(id string) error {
+func (db *DbHandle) DecrSummaryLike(id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"likes_count": -1}}
 		return c.Update(bson.M{"_id": id}, data)
@@ -246,7 +233,7 @@ func (db *DBHandle) DecrSummaryLike(id string) error {
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) IncrSummaryRepost(id string) error {
+func (db *DbHandle) IncrSummaryRepost(id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"repost_count": 1}}
 		_, err := c.Upsert(bson.M{"_id": id}, data)
@@ -255,7 +242,7 @@ func (db *DBHandle) IncrSummaryRepost(id string) error {
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DBHandle) DecrSummaryRepost(id string) error {
+func (db *DbHandle) DecrSummaryRepost(id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"repost_count": -1}}
 		return c.Update(bson.M{"_id": id}, data)

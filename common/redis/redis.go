@@ -282,6 +282,22 @@ func ZRem(zkey, member string) (err error) {
 	return Doit(handle)
 }
 
+func ZRemByScore(zkey string, min, max int64) (err error) {
+	handle := func(conn redis.Conn) error {
+		_, err = conn.Do("ZREMRANGEBYSCORE", zkey, min, max)
+		return err
+	}
+	return Doit(handle)
+}
+
+func ZCard(zkey string) (val int64, err error) {
+	handle := func(conn redis.Conn) error {
+		val, err = redis.Int64(conn.Do("ZCARD", zkey))
+		return err
+	}
+	return val, Doit(handle)
+}
+
 // --List
 func LPopString(lkey string) (val string, err error) {
 	return redis.String(LPop(lkey))
