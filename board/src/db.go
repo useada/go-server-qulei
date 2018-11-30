@@ -16,16 +16,16 @@ var DB = &DbHandle{}
 
 // -- Comment
 
-func (db *DbHandle) ListComments(oid, cid, direct string, stamp int64,
+func (db *DbHandle) ListComments(oid, cid, direction string, stamp int64,
 	limit int) (CommentModels, error) {
 	items := make(CommentModels, 0)
 	handle := func(c *mgo.Collection) error {
 		query := bson.M{"oid": oid, "cid": cid}
-		if len(direct) != 0 {
-			query["created_at"] = bson.M{"$" + direct: stamp} //$gt, $lt
+		if len(direction) != 0 {
+			query["created_at"] = bson.M{"$" + direction: stamp} //$gt, $lt
 		}
 
-		if direct == "gt" || direct == "gte" {
+		if direction == "gt" || direction == "gte" {
 			return c.Find(query).Sort("created_at").Limit(limit).All(&items)
 		}
 
@@ -65,8 +65,8 @@ func (db *DbHandle) DelComment(id string) error {
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DbHandle) IncrCommReply(level int, cid string, pitem *CommentModel) error {
-	if level == LEVEL_COMM_FIRST || len(cid) == 0 {
+func (db *DbHandle) IncrCommReply(cid string, pitem *CommentModel) error {
+	if len(cid) == 0 {
 		return nil
 	}
 	handle := func(c *mgo.Collection) error {
@@ -79,8 +79,8 @@ func (db *DbHandle) IncrCommReply(level int, cid string, pitem *CommentModel) er
 	return mongo.Doit("BoardComment", "comment", handle)
 }
 
-func (db *DbHandle) DecrCommReply(level int, cid, rid string) error {
-	if level == LEVEL_COMM_FIRST || len(cid) == 0 {
+func (db *DbHandle) DecrCommReply(cid, rid string) error {
+	if len(cid) == 0 {
 		return nil
 	}
 	handle := func(c *mgo.Collection) error {
@@ -193,10 +193,10 @@ func (db *DbHandle) GetSummary(id string) (*SummaryModel, error) {
 	return pitem, mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DbHandle) IncrSummaryComm(level int, id string) error {
+func (db *DbHandle) IncrSummaryComm(cid, id string) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"comms_count": 1}}
-		if level == LEVEL_COMM_FIRST {
+		if len(cid) == 0 {
 			data["$inc"] = bson.M{"comms_count": 1, "comms_first_count": 1}
 		}
 		_, err := c.Upsert(bson.M{"_id": id}, data)
@@ -205,10 +205,10 @@ func (db *DbHandle) IncrSummaryComm(level int, id string) error {
 	return mongo.Doit("BoardSummary", "summary", handle)
 }
 
-func (db *DbHandle) DecrSummaryComm(level int, id string, count int) error {
+func (db *DbHandle) DecrSummaryComm(cid, id string, count int) error {
 	handle := func(c *mgo.Collection) error {
 		data := bson.M{"$inc": bson.M{"comms_count": -count}}
-		if level == LEVEL_COMM_FIRST {
+		if len(cid) == 0 {
 			data["$inc"] = bson.M{"comms_count": -count, "comms_first_count": -1}
 		}
 		return c.Update(bson.M{"_id": id}, data)

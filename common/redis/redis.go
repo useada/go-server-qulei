@@ -368,8 +368,6 @@ var gRedigo *redis.Pool
 func Init(conf configor.RedisConfigor) {
 	fmt.Println("初始化Redis连接池")
 	gRedigo = &redis.Pool{
-		MaxIdle:   conf.MaxIdle,
-		MaxActive: conf.MaxIdle * 100,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", conf.Host,
 				redis.DialConnectTimeout(time.Duration(500)*time.Millisecond),
@@ -390,5 +388,7 @@ func Init(conf configor.RedisConfigor) {
 			}
 			return c, nil
 		},
+		MaxIdle:   conf.MaxIdle,
+		MaxActive: conf.MaxIdle * 100,
 	}
 }

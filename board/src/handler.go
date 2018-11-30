@@ -25,13 +25,13 @@ func (s *SvrHandler) ListComments(ctx context.Context,
 		return nil, err
 	}
 
-	items, err := s.listCacheComms(in.Oid, in.Cid, in.Direct, ptk)
+	items, err := s.listCacheComms(in.Oid, in.Cid, in.Dir, ptk)
 	if err == nil {
 		sort.Sort(items)
-		return s.packCommentInfos(items, ptk, in.Direct, in.Uid)
+		return s.packCommentInfos(items, ptk, in.Dir, in.Uid)
 	}
 
-	items, err = s.listDBComms(in.Oid, in.Cid, in.Direct, ptk)
+	items, err = s.listDBComms(in.Oid, in.Cid, in.Dir, ptk)
 	if err != nil {
 		Log.Error("list db comments oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 		return nil, err
@@ -40,7 +40,7 @@ func (s *SvrHandler) ListComments(ctx context.Context,
 	if len(items) > ptk.Limit {
 		items = items[0:ptk.Limit]
 	}
-	return s.packCommentInfos(items, ptk, in.Direct, in.Uid)
+	return s.packCommentInfos(items, ptk, in.Dir, in.Uid)
 }
 
 func (s *SvrHandler) GetComment(ctx context.Context,
@@ -66,16 +66,16 @@ func (s *SvrHandler) NewComment(ctx context.Context,
 		return nil, err
 	}
 
-	if err := DB.IncrCommReply(int(in.Level), in.Cid, pitem); err == nil {
+	if err := DB.IncrCommReply(in.Cid, pitem); err == nil {
 		Cache.DelHashComm(in.Oid, in.Cid)
 	} else {
 		Log.Error("incr reply oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 	}
 
-	if err := DB.IncrSummaryComm(int(in.Level), in.Oid); err == nil {
+	if err := DB.IncrSummaryComm(in.Cid, in.Oid); err == nil {
 		Cache.DelSummary(in.Oid)
 	} else {
-		Log.Error("incr summary oid:%s level:%d err:%v", in.Oid, in.Level, err)
+		Log.Error("incr summary oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 	}
 	return &pb.ReplyBaseInfo{Id: pitem.Id}, nil
 }
@@ -89,16 +89,16 @@ func (s *SvrHandler) DelComment(ctx context.Context,
 		return nil, err
 	}
 
-	if err := DB.DecrCommReply(int(in.Level), in.Cid, in.Id); err == nil {
+	if err := DB.DecrCommReply(in.Cid, in.Id); err == nil {
 		Cache.DelHashComm(in.Oid, in.Cid)
 	} else {
 		Log.Error("decr reply oid:%s id:%s err:%v", in.Oid, in.Id, err)
 	}
 
-	if err := DB.DecrSummaryComm(int(in.Level), in.Oid, 1); err == nil {
+	if err := DB.DecrSummaryComm(in.Cid, in.Oid, 1); err == nil {
 		Cache.DelSummary(in.Oid)
 	} else {
-		Log.Error("decr summary oid:%s level:%v err:%v", in.Oid, in.Level, err)
+		Log.Error("decr summary oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 	}
 	return &pb.ReplyBaseInfo{Id: in.Id}, nil
 }
@@ -210,22 +210,22 @@ func (s *SvrHandler) MutiGetSummary(ctx context.Context,
 	return s.packSummaryInfos(append(citems, ditems...), in.Uid)
 }
 
-func (s *SvrHandler) listCacheComms(oid, cid, direct string,
+func (s *SvrHandler) listCacheComms(oid, cid, direction string,
 	ptk page.PageToken) (CommentModels, error) {
-	ids, err := Cache.ListZsetComms(oid, cid, direct, ptk.Offset, ptk.Limit)
+	ids, err := Cache.ListZsetComms(oid, cid, direction, ptk.Offset, ptk.Limit)
 	if err != nil {
 		return nil, err
 	}
 	return s.mutiGetComms(oid, ids)
 }
 
-func (s *SvrHandler) listDBComms(oid, cid, direct string,
+func (s *SvrHandler) listDBComms(oid, cid, direction string,
 	ptk page.PageToken) (CommentModels, error) {
 	limit := ptk.Limit
 	if ptk.Offset == 0 {
 		limit = COUNT_COMM_CACHE
 	}
-	items, err := DB.ListComments(oid, cid, direct, ptk.Offset, limit)
+	items, err := DB.ListComments(oid, cid, direction, ptk.Offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -237,13 +237,13 @@ func (s *SvrHandler) listDBComms(oid, cid, direct string,
 }
 
 func (s *SvrHandler) packCommentInfos(items CommentModels,
-	ptk page.PageToken, direct, uid string) (*pb.CommentInfos, error) {
+	ptk page.PageToken, direction, uid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
 		Items: make([]*pb.CommentInfo, 0),
 	}
 
 	if ptk.Limit == len(items) {
-		if direct == "lt" || direct == "lte" {
+		if direction == "lt" || direction == "lte" {
 			ptk.Offset = items[0].CreatedAt
 		} else {
 			ptk.Offset = items[ptk.Limit-1].CreatedAt
@@ -399,11 +399,10 @@ func (s *SvrHandler) userCommLikes(uid string) map[string]CommentLikeModel {
 	if err == nil && len(ditems) == 0 {
 		ditems = append(ditems, CommentLikeModel{Id: "GUARD-ID", Cid: "GUARD-Cid"})
 	}
+	Cache.NewUserCommLikes(uid, ditems)
+
 	for _, item := range ditems {
 		xmap[item.Cid] = item
-	}
-	if len(ditems) > 0 {
-		Cache.NewUserCommLikes(uid, ditems)
 	}
 	return xmap
 }
@@ -426,11 +425,10 @@ func (s *SvrHandler) userLikes(uid string) map[string]LikeModel {
 	if err == nil && len(ditems) == 0 {
 		ditems = append(ditems, LikeModel{Id: "GUARD-ID", Oid: "GUARD-Oid"})
 	}
+	Cache.NewUserLikes(uid, ditems)
+
 	for _, item := range ditems {
 		xmap[item.Oid] = item
-	}
-	if len(ditems) > 0 {
-		Cache.NewUserLikes(uid, ditems)
 	}
 	return xmap
 }

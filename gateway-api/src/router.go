@@ -14,11 +14,11 @@ func Router() *gin.Engine {
 		file.POST("/v1/file/upload", ResponseWrapper(File.Upload))
 	}
 
-	user := r.Group("/")
-	user.Use()
+	search := r.Group("/")
+	search.Use()
 	{
-		user.GET("/v1/user/search/name", ResponseWrapper(User.SearchByName))
-		user.GET("/v1/user/search/near", ResponseWrapper(User.SearchByNear))
+		search.GET("/v1/search/user/name", ResponseWrapper(Search.UsersByName))
+		search.GET("/v1/search/user/near", ResponseWrapper(Search.UsersByNear))
 	}
 
 	return r

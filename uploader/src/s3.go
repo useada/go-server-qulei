@@ -16,9 +16,9 @@ type S3Client struct {
 	Bucket string // s3 bucket to upload to
 }
 
-func (s *S3Client) Upload(id, ex string, typef pb.FileType, data []byte) error {
+func (s *S3Client) Upload(id, ex string, xtype pb.TYPE, data []byte) error {
 	_, err := s.Client.PutObject(&s3.PutObjectInput{
-		Key:         aws.String(s.RemoteDir(id, ex, typef)),
+		Key:         aws.String(s.RemoteDir(id, ex, xtype)),
 		Body:        bytes.NewReader(data),
 		Bucket:      aws.String(s.Bucket),
 		ACL:         aws.String(s.ACL),
@@ -39,14 +39,14 @@ func (s *S3Client) GetBucket() string {
 	return s.Bucket
 }
 
-var RemoteDirMap = map[pb.FileType]string{
-	pb.FileType_IMAGE:  "/image/",
-	pb.FileType_AVATAR: "/avatar/",
-	pb.FileType_FILE:   "/file/",
+var RemoteDirMap = map[pb.TYPE]string{
+	pb.TYPE_IMAGE:  "/image/",
+	pb.TYPE_AVATAR: "/avatar/",
+	pb.TYPE_FILE:   "/file/",
 }
 
-func (s *S3Client) RemoteDir(id, ex string, typef pb.FileType) string {
-	return RemoteDirMap[typef] + "original/" + id + "." + ex
+func (s *S3Client) RemoteDir(id, ex string, xtype pb.TYPE) string {
+	return RemoteDirMap[xtype] + "original/" + id + "." + ex
 }
 
 var ContentTypeMap = map[string]string{

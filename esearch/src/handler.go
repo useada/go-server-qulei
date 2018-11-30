@@ -16,16 +16,16 @@ func RegisterHandler(svr *grpc.Server) {
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) SearchByName(ctx context.Context,
-	in *pb.SearchNameArgs) (*pb.SearchUserInfos, error) {
-	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
+func (s *SvrHandler) UsersByName(ctx context.Context,
+	in *pb.UsersByNameArgs) (*pb.UserInfos, error) {
+	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	ptok := page.PageToken{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
 
-	rows, err := ES.SearchByName(in.Name, int(ptok.Offset), ptok.Limit)
+	rows, err := ES.UsersByName(in.Name, int(ptok.Offset), ptok.Limit)
 	if err != nil || len(rows) == 0 {
 		return &res, err
 	}
@@ -40,16 +40,16 @@ func (s *SvrHandler) SearchByName(ctx context.Context,
 	return &res, nil
 }
 
-func (s *SvrHandler) SearchByNear(ctx context.Context,
-	in *pb.SearchNearArgs) (*pb.SearchUserInfos, error) {
-	res := pb.SearchUserInfos{Items: make([](*pb.SearchUserInfo), 0)}
+func (s *SvrHandler) UsersByNear(ctx context.Context,
+	in *pb.UsersByNearArgs) (*pb.UserInfos, error) {
+	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	ptok := page.PageToken{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
 
-	rows, err := ES.SearchByNear(in.Lat, in.Lon, int(in.Gender),
+	rows, err := ES.UsersByNear(in.Lat, in.Lon, int(in.Gender),
 		int(ptok.Offset), ptok.Limit)
 	if err != nil || len(rows) == 0 {
 		return &res, err
@@ -65,9 +65,9 @@ func (s *SvrHandler) SearchByNear(ctx context.Context,
 	return &res, nil
 }
 
-func (s *SvrHandler) transUserInfo(res *pb.SearchUserInfos, rows []SearchItem) {
+func (s *SvrHandler) transUserInfo(res *pb.UserInfos, rows []SearchModel) {
 	for _, row := range rows {
-		user := pb.SearchUserInfo{}
+		user := pb.UserInfo{}
 		if err := json.Unmarshal(row.Source, &user); err != nil {
 			continue
 		}

@@ -27,7 +27,7 @@ service Board {
 message CommListArgs {
     string oid        = 1; // 对象id
     string cid        = 2; // 一级评论id
-    string direct     = 3;
+    string dir        = 3; // 滑动方向direction
     string uid        = 4; // 请求用户的uid
     string page_token = 5;
 }
@@ -41,7 +41,6 @@ message CommGetArgs {
 message CommNewArgs {
     string oid          = 1;
     string cid          = 2; // 一级评论id
-    int32  level        = 3;
     bool   is_repost    = 4;
     string content      = 5;
     string img_id       = 6;
@@ -54,7 +53,6 @@ message CommDelArgs {
     string oid   = 2;
     string cid   = 3;
     string uid   = 4; // 请求用户的uid
-    int32  level = 5;
 }
 
 message CommLikeArgs {
@@ -100,7 +98,6 @@ message CommentInfo {
     string id          = 1;
     string oid         = 2;
     string cid         = 3; // 一级评论id;
-    int32  level       = 4;
     string content     = 5;
     string img_id      = 6;
     string img_ex      = 7;

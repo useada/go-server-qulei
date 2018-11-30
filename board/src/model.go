@@ -7,20 +7,19 @@ import (
 )
 
 type CommentModel struct {
-	Id       string `json:"id" bson:"_id,omitempty"`
-	Oid      string `json:"oid" bson:"oid"`
-	IsRepost bool   `json:"is_repost" bson:"is_repost"`
-	Level    int    `json:"level" bson:"level"`
-	Cid      string `json:"cid" bson:"cid"`
+	Id  string `json:"id" bson:"_id,omitempty"`
+	Oid string `json:"oid" bson:"oid"`
+	Cid string `json:"cid" bson:"cid"`
 
 	Uname    string `json:"uname" bson:"uname"`
 	Uid      string `json:"uid" bson:"uid"`
 	AvatarId string `json:"avatar_id" bson:"avatar_id"`
 	AvatarEx string `json:"avatar_ex" bson:"avatar_ex"`
 
-	Content string `json:"content" bson:"content"`
-	ImgId   string `json:"img_id" bson:"img_id"`
-	ImgEx   string `json:"img_ex" bson:"img_ex"`
+	IsRepost bool   `json:"is_repost" bson:"is_repost"`
+	Content  string `json:"content" bson:"content"`
+	ImgId    string `json:"img_id" bson:"img_id"`
+	ImgEx    string `json:"img_ex" bson:"img_ex"`
 
 	IsLiking   bool  `json:"is_liking" bson:"is_liking,omitempty"`
 	LikesCount int64 `json:"likes_count" bson:"likes_count"`
@@ -35,7 +34,6 @@ func (c *CommentModel) ConstructPb() *pb.CommentInfo {
 		Id:         c.Id,
 		Oid:        c.Oid,
 		IsRepost:   c.IsRepost,
-		Level:      int32(c.Level),
 		Cid:        c.Cid,
 		Content:    c.Content,
 		ImgId:      c.ImgEx,
@@ -57,7 +55,6 @@ func (c *CommentModel) DestructPb(in *pb.CommNewArgs) *CommentModel {
 	c.Id = xid.New().String()
 	c.Oid = in.Oid
 	c.IsRepost = in.IsRepost
-	c.Level = int(in.Level)
 	c.Cid = in.Cid
 	c.Uname = in.Author.Uname
 	c.Uid = in.Author.Uid

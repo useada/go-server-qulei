@@ -11,17 +11,17 @@ type DbHandle struct {
 
 var DB *DbHandle
 
-func (db *DbHandle) GetFileInfo(fid string) (FileInfoDB, error) {
-	row := FileInfoDB{}
+func (db *DbHandle) GetFileInfo(fid string) (*FileInfoModel, error) {
+	pitem := &FileInfoModel{}
 	handle := func(orm *gorm.DB) error {
-		return orm.Where("fid=?", fid).Find(&row).Error
+		return orm.Where("fid=?", fid).Find(pitem).Error
 	}
-	return row, mysql.Doit(db.DataBase(), handle)
+	return pitem, mysql.Doit(db.DataBase(), handle)
 }
 
-func (db *DbHandle) AddFileInfo(info *FileInfoDB) error {
+func (db *DbHandle) AddFileInfo(item *FileInfoModel) error {
 	handle := func(orm *gorm.DB) error {
-		return orm.Create(info).Error
+		return orm.Create(item).Error
 	}
 	return mysql.Doit(db.DataBase(), handle)
 }

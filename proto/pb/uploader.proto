@@ -11,20 +11,23 @@ service Uploader {
 }
 
 // 文件类型 图片/头像/普通文件
-enum FileType {
-    IMAGE = 0;
+enum TYPE {
+    IMAGE  = 0;
     AVATAR = 1;
-    FILE = 2;
+    FILE   = 2;
 }
 
 // -- Request
 
 // 文件上传参数
 message FileUploadArgs {
-    string   id    = 1; // 文件id sha1生成
-    string   ex    = 2; // 文件扩展名
-    FileType typef = 3; // 标明文件的类型，在s3上也是存放在不同的桶内
-    bytes    data  = 4; // 文件二进制内容
+    string id     = 1; // 文件id sha1生成
+    string ex     = 2; // 文件扩展名
+    TYPE   type   = 3; // 标明文件的类型，在s3上也是存放在不同的桶内
+    bytes  data   = 4; // 文件二进制内容
+    int32  width  = 5; // 文件宽 (用于图片)
+    int32  height = 6; // 文件高 (用于图片)
+    int64  size   = 7; // 文件大小
 }
 
 // 根据文件id拉取文件信息的参数
@@ -36,10 +39,10 @@ message FileQueryArgs {
 
 // 文件信息
 message FileInfo {
-    string   id     = 1; // 文件id
-    string   ex     = 2; // 文件扩展名
-    FileType typef  = 3; // 文件类型 图片/头像/普通文件
-    int32    width  = 4; // 文件宽 (用于图片)
-    int32    height = 5; // 文件高 (用于图片)
-    int64    size   = 6; // 文件大小
+    string id     = 1; // 文件id
+    string ex     = 2; // 文件扩展名
+    TYPE   type   = 3; // 文件类型 图片/头像/普通文件
+    int32  width  = 4; // 文件宽 (用于图片)
+    int32  height = 5; // 文件高 (用于图片)
+    int64  size   = 6; // 文件大小
 }

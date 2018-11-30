@@ -8,12 +8,13 @@ logpath = "/data/logs/board/"
 host = "192.168.200.191:8500"
 
 [redis]
-host = "redis-test.gengxo.ng.0001.use2.cache.amazonaws.com:6379"
+host = "192.168.200.191:6379"
 auth = ""
-index = 1
+index = 15 
 max_idle = 10
 
 [mongo]
-host = "172.31.35.223:20000,172.31.39.42:20000"
-auth = "testuser:BwUSdSQxtUx@"
-database = ["Board"]
+host = "127.0.0.1:27017"
+#auth = "test:BwUSdSQxtUx@"
+auth = ""
+database = ["BoardComment", "BoardLike", "BoardSummary"]

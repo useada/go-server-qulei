@@ -44,10 +44,10 @@ func (f *FileHandler) Upload(ctx *gin.Context) *JsonResponse {
 	}
 
 	res, err := gclient.Uploader.Upload(&pb.FileUploadArgs{
-		Id:    id,
-		Ex:    args.Ex,
-		Typef: pb.FileType(args.Type),
-		Data:  bin,
+		Id:   id,
+		Ex:   args.Ex,
+		Type: pb.TYPE(args.Type),
+		Data: bin,
 	})
 	if err != nil {
 		Log.Error("upload file err:%v", err)

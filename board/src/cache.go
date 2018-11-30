@@ -53,18 +53,14 @@ func (c *CacheHandle) MutiGetSummary(oids []string) (SummaryModels, error) {
 	for _, oid := range oids {
 		keys = append(keys, c.KeySummary(oid))
 	}
-
-	items := make(SummaryModels, 0)
 	vals, err := redis.MGetBytes(keys)
 	if err != nil {
-		return items, err
+		return nil, err
 	}
 
+	items := make(SummaryModels, 0)
 	for _, val := range vals {
-		if len(val) == 0 {
-			continue
-		}
-		var item SummaryModel
+		item := SummaryModel{}
 		if err = json.Unmarshal(val, &item); err != nil {
 			continue
 		}
@@ -96,6 +92,10 @@ func (c *CacheHandle) ListUserCommLikes(uid string) (CommentLikeModels, error) {
 
 func (c *CacheHandle) NewUserCommLikes(uid string,
 	items CommentLikeModels) error {
+	if len(items) == 0 {
+		return nil
+	}
+
 	data, err := json.Marshal(items)
 	if err != nil {
 		return err
@@ -117,6 +117,10 @@ func (c *CacheHandle) ListUserLikes(uid string) (LikeModels, error) {
 }
 
 func (c *CacheHandle) NewUserLikes(uid string, items LikeModels) error {
+	if len(items) == 0 {
+		return nil
+	}
+
 	data, err := json.Marshal(items)
 	if err != nil {
 		return err
@@ -150,11 +154,12 @@ func (c *CacheHandle) GetHashComm(oid, id string) (*CommentModel, error) {
 
 func (c *CacheHandle) MutiGetHashComms(oid string,
 	ids []string) (CommentModels, error) {
-	items := make(CommentModels, 0)
 	vals, err := redis.HMGetBytes(c.KeyHashComms(oid), ids)
 	if err != nil {
-		return items, err
+		return nil, err
 	}
+
+	items := make(CommentModels, 0)
 	for _, val := range vals {
 		item := CommentModel{}
 		if err := json.Unmarshal(val, &item); err != nil {
@@ -201,7 +206,7 @@ func (c *CacheHandle) InitZsetComms(oid, cid string,
 	return err
 }
 
-func (c *CacheHandle) ListZsetComms(oid, cid, direct string,
+func (c *CacheHandle) ListZsetComms(oid, cid, direction string,
 	stamp int64, limit int) (ids []string, err error) {
 	zkey := c.KeyZsetComms(oid + cid)
 	if ok := c.CheckZsetCommsKey(zkey); !ok {
@@ -212,7 +217,7 @@ func (c *CacheHandle) ListZsetComms(oid, cid, direct string,
 		return nil, errors.New("cache empty")
 	}
 
-	if direct == "gt" || direct == "gte" {
+	if direction == "gt" || direction == "gte" {
 		return c.ListZsetCommsNewer(zkey, stamp+1, TIMESTAMP_INF, limit)
 	}
 	return c.ListZsetCommsOlder(zkey, stamp-1, 0, limit)

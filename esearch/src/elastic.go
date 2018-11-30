@@ -18,12 +18,12 @@ func InitElasticClient(conf ElasticConfigor) (err error) {
 	return err
 }
 
-func (es *EsHandle) SearchByName(name string,
-	offset, limit int) ([]SearchItem, error) {
+func (es *EsHandle) UsersByName(name string,
+	offset, limit int) ([]SearchModel, error) {
 	queryer := elastic.NewBoolQuery()
 	queryer = queryer.Should(elastic.NewQueryStringQuery(name).Field("name"))
 
-	items := make([]SearchItem, 0)
+	items := make([]SearchModel, 0)
 	res, err := es.Client.Search().Index("user").Query(queryer).
 		From(offset).Size(limit).Do(context.Background())
 	if err != nil {
@@ -35,13 +35,13 @@ func (es *EsHandle) SearchByName(name string,
 	}
 
 	for _, hit := range res.Hits.Hits {
-		items = append(items, SearchItem{Source: *hit.Source})
+		items = append(items, SearchModel{Source: *hit.Source})
 	}
 	return items, err
 }
 
-func (es *EsHandle) SearchByNear(lat, lon float64, gender,
-	offset, limit int) ([]SearchItem, error) {
+func (es *EsHandle) UsersByNear(lat, lon float64, gender,
+	offset, limit int) ([]SearchModel, error) {
 	queryer := elastic.NewBoolQuery()
 	queryer = queryer.Filter(elastic.NewTermQuery("state", 0),
 		elastic.NewGeoDistanceQuery("geo").Point(lat, lon).Distance("10km"))
@@ -49,7 +49,7 @@ func (es *EsHandle) SearchByNear(lat, lon float64, gender,
 	sorter := elastic.NewGeoDistanceSort("geo").
 		Point(lat, lon).Asc().Unit("km").SortMode("min").GeoDistance("plane")
 
-	items := make([]SearchItem, 0)
+	items := make([]SearchModel, 0)
 	res, err := es.Client.Search().Index("user").Query(queryer).
 		SortBy(sorter).From(offset).Size(limit).Do(context.Background())
 	if err != nil {
@@ -60,7 +60,7 @@ func (es *EsHandle) SearchByNear(lat, lon float64, gender,
 	}
 
 	for _, hit := range res.Hits.Hits {
-		item := SearchItem{Source: *hit.Source}
+		item := SearchModel{Source: *hit.Source}
 		if len(hit.Sort) != 0 {
 			item.Distance = hit.Sort[0].(float64)
 		}

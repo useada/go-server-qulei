@@ -25,7 +25,7 @@ var gMgo map[string]*mgo.Session
 func Init(conf configor.MongoConfigor) error {
 	gMgo = make(map[string]*mgo.Session)
 	for _, db := range conf.Database {
-		addr := "mongodb://" + conf.Auth + conf.Host + db
+		addr := "mongodb://" + conf.Auth + conf.Host + "/" + db
 		fmt.Println("初始化Mongo数据库:", addr, " 连接池")
 
 		sess, err := mgo.DialWithTimeout(addr, 10*time.Second)

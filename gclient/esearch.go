@@ -12,26 +12,24 @@ type EsClient struct {
 
 var Esearch *EsClient
 
-func (e *EsClient) SearchByName(args *pb.SearchNameArgs) (*pb.SearchUserInfos, error) {
-	conn, err := getConn(e.service())
+func (e *EsClient) UsersByName(args *pb.UsersByNameArgs) (*pb.UserInfos, error) {
+	conn, err := GetConn(e.service())
 	if err != nil {
 		return nil, err
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout())
 	defer cancel()
-	return pb.NewEsearchClient(conn).SearchByName(ctx, args)
+	return pb.NewEsearchClient(conn).UsersByName(ctx, args)
 }
 
-func (e *EsClient) SearchByNear(args *pb.SearchNearArgs) (*pb.SearchUserInfos, error) {
-	conn, err := getConn(e.service())
+func (e *EsClient) UsersByNear(args *pb.UsersByNearArgs) (*pb.UserInfos, error) {
+	conn, err := GetConn(e.service())
 	if err != nil {
 		return nil, err
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout())
 	defer cancel()
-	return pb.NewEsearchClient(conn).SearchByNear(ctx, args)
+	return pb.NewEsearchClient(conn).UsersByNear(ctx, args)
 }
 
 func (e *EsClient) timeout() time.Duration {

@@ -6,4 +6,4 @@ logpath = "/data/logs/gateway-api/"
 
 [grpc]
 consul = "192.168.200.191:8500"
-services = ["cabinets"]
+services = ["board", "uploader", "esearch"]

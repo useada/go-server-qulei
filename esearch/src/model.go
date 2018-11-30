@@ -1,6 +1,6 @@
 package main
 
-type SearchItem struct {
+type SearchModel struct {
 	Source   []byte
 	Distance float64
 }

@@ -27,7 +27,7 @@ func Init(consul string, services []string) error {
 	return nil
 }
 
-func getConn(service string) (*grpc.ClientConn, error) {
+func GetConn(service string) (*grpc.ClientConn, error) {
 	conn, ok := GrpcConns[service]
 	if !ok {
 		return nil, errors.New(service + " conn not exist")
