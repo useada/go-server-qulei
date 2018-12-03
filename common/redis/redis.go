@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 
 	"a.com/go-server/common/configor"
 )
@@ -41,7 +41,7 @@ func Set(key string, val interface{}, ttl int64) (err error) {
 		if ttl > 0 {
 			args = append(args, "EX", ttl)
 		}
-		_, err = conn.Do("SET", args)
+		_, err = conn.Do("SET", args...)
 		return err
 	}
 	return Doit(handle)
@@ -82,7 +82,7 @@ func MGet(keys []string) (res interface{}, err error) {
 // args:  [key1, val1, key2, val2, ...]
 func MSet(args []interface{}) (err error) {
 	handle := func(conn redis.Conn) error {
-		_, err = conn.Do("MSET", args)
+		_, err = conn.Do("MSET", args...)
 		return err
 	}
 	return Doit(handle)
@@ -246,9 +246,9 @@ func ZRangeByScore(zkey string, beg, end int64, limit int) (items []string, err 
 	handle := func(conn redis.Conn) error {
 		args := []interface{}{zkey, beg, end}
 		if limit > 0 {
-			args = append(args, "limit", 0, limit)
+			args = append(args, "LIMIT", 0, limit)
 		}
-		items, err = redis.Strings(conn.Do("ZRANGEBYSCORE", args))
+		items, err = redis.Strings(conn.Do("ZRANGEBYSCORE", args...))
 		return err
 	}
 	return items, Doit(handle)
@@ -260,7 +260,7 @@ func ZRevRangeByScore(zkey string, beg, end int64, limit int) (items []string, e
 		if limit > 0 {
 			args = append(args, "limit", 0, limit)
 		}
-		items, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", args))
+		items, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", args...))
 		return err
 	}
 	return items, Doit(handle)

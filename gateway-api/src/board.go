@@ -1,11 +1,13 @@
 package main
 
 import (
-	"a.com/gin/binding"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+
 	"a.com/go-server/common/page"
 	"a.com/go-server/gclient"
+	"a.com/go-server/proto/ct"
 	"a.com/go-server/proto/pb"
-	"github.com/gin-gonic/gin"
 )
 
 type BoardHandler struct {
@@ -21,18 +23,18 @@ func (b *BoardHandler) ListComments(ctx *gin.Context) *JsonResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		Cid       string `form:"cid"` // cid != "" 拉取二级评论
-		Dir       string `form:"direction"`
 		PageToken string `form:"page_token"`
 	}
-	args.PageToken, _ = page.DefaultPageToken(BOARD_PAGE_COUNT)
 	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
+	}
+	if args.PageToken == "" {
+		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
 	res, err := gclient.Board.ListComments(&pb.CommListArgs{
 		Oid:       args.Oid,
 		Cid:       args.Cid,
-		Dir:       args.Dir,
 		Uid:       "testuid", // TODO
 		PageToken: args.PageToken,
 	})
@@ -82,9 +84,9 @@ func (b *BoardHandler) NewComment(ctx *gin.Context) *JsonResponse {
 			Uid: "testuid", // TODO
 		},
 		IsRepost: args.IsRepost,
-		Content:  args.Content,
 		ImgId:    args.ImgId,
 		ImgEx:    args.ImgEx,
+		Content:  args.Content,
 	})
 	if err != nil {
 		return ErrorResponse(INTERNEL_ERR, err.Error())
@@ -159,9 +161,11 @@ func (b *BoardHandler) ListLikes(ctx *gin.Context) *JsonResponse {
 		Oid       string `form:"oid" binding:"required"`
 		PageToken string `form:"page_token"`
 	}
-	args.PageToken, _ = page.DefaultPageToken(BOARD_PAGE_COUNT)
 	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
+	}
+	if args.PageToken == "" {
+		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
 	res, err := gclient.Board.ListLikes(&pb.LikeListArgs{

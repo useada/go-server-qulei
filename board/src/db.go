@@ -1,8 +1,6 @@
 package main
 
 import (
-	"sort"
-
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
@@ -16,20 +14,11 @@ var DB = &DbHandle{}
 
 // -- Comment
 
-func (db *DbHandle) ListComments(oid, cid, direction string, stamp int64,
+func (db *DbHandle) ListComments(oid, cid string, stamp int64,
 	limit int) (CommentModels, error) {
 	items := make(CommentModels, 0)
 	handle := func(c *mgo.Collection) error {
-		query := bson.M{"oid": oid, "cid": cid}
-		if len(direction) != 0 {
-			query["created_at"] = bson.M{"$" + direction: stamp} //$gt, $lt
-		}
-
-		if direction == "gt" || direction == "gte" {
-			return c.Find(query).Sort("created_at").Limit(limit).All(&items)
-		}
-
-		defer sort.Sort(items) // created_at升序返回
+		query := bson.M{"oid": oid, "cid": cid, "created_at": bson.M{"$lt": stamp}}
 		return c.Find(query).Sort("-created_at").Limit(limit).All(&items)
 	}
 	return items, mongo.Doit("BoardComment", "comment", handle)
@@ -71,7 +60,7 @@ func (db *DbHandle) IncrCommReply(cid string, pitem *CommentModel) error {
 	}
 	handle := func(c *mgo.Collection) error {
 		replys := bson.M{"$each": CommentModels{*pitem},
-			"$sort": "-created_at", "$slice": 3}
+			"$sort": bson.M{"created_at": -1}, "$slice": 2}
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$push": bson.M{"replys": replys},
 				"$inc": bson.M{"reply_count": 1}})
@@ -135,10 +124,7 @@ func (db *DbHandle) ListLikes(oid string, stamp int64,
 	limit int) (LikeModels, error) {
 	items := make(LikeModels, 0)
 	handle := func(c *mgo.Collection) error {
-		query := bson.M{"oid": oid}
-		if stamp != 0 {
-			query["created_at"] = bson.M{"$lt": stamp}
-		}
+		query := bson.M{"oid": oid, "created_at": bson.M{"$lt": stamp}}
 		return c.Find(query).Sort("-created_at").Limit(limit).All(&items)
 	}
 	return items, mongo.Doit("BoardLike", "like", handle)

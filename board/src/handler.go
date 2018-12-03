@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 
 	"a.com/go-server/common/page"
+	"a.com/go-server/proto/ct"
 	"a.com/go-server/proto/pb"
 )
 
@@ -25,22 +26,18 @@ func (s *SvrHandler) ListComments(ctx context.Context,
 		return nil, err
 	}
 
-	items, err := s.listCacheComms(in.Oid, in.Cid, in.Dir, ptk)
+	items, err := s.listCacheComms(in.Oid, in.Cid, ptk)
 	if err == nil {
 		sort.Sort(items)
-		return s.packCommentInfos(items, ptk, in.Dir, in.Uid)
+		return s.packCommentInfos(items, ptk, in.Uid)
 	}
 
-	items, err = s.listDBComms(in.Oid, in.Cid, in.Dir, ptk)
+	items, err = s.listDBComms(in.Oid, in.Cid, ptk)
 	if err != nil {
 		Log.Error("list db comments oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 		return nil, err
 	}
-
-	if len(items) > ptk.Limit {
-		items = items[0:ptk.Limit]
-	}
-	return s.packCommentInfos(items, ptk, in.Dir, in.Uid)
+	return s.packCommentInfos(items, ptk, in.Uid)
 }
 
 func (s *SvrHandler) GetComment(ctx context.Context,
@@ -146,7 +143,7 @@ func (s *SvrHandler) ListLikes(ctx context.Context,
 		return nil, err
 	}
 
-	items, err := DB.ListLikes(in.Oid, ptk.Offset, ptk.Limit)
+	items, err := DB.ListLikes(in.Oid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
 		Log.Error("list likes oid:%s offset:%d err:%v", in.Oid, ptk.Offset, err)
 		return nil, err
@@ -210,44 +207,41 @@ func (s *SvrHandler) MutiGetSummary(ctx context.Context,
 	return s.packSummaryInfos(append(citems, ditems...), in.Uid)
 }
 
-func (s *SvrHandler) listCacheComms(oid, cid, direction string,
+func (s *SvrHandler) listCacheComms(oid, cid string,
 	ptk page.PageToken) (CommentModels, error) {
-	ids, err := Cache.ListZsetComms(oid, cid, direction, ptk.Offset, ptk.Limit)
+	ids, err := Cache.ListZsetComms(oid, cid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
 		return nil, err
 	}
 	return s.mutiGetComms(oid, ids)
 }
 
-func (s *SvrHandler) listDBComms(oid, cid, direction string,
+func (s *SvrHandler) listDBComms(oid, cid string,
 	ptk page.PageToken) (CommentModels, error) {
-	limit := ptk.Limit
-	if ptk.Offset == 0 {
-		limit = COUNT_COMM_CACHE
+	count := ptk.Limit
+	if ptk.Offset == ct.TIME_INF_MAX {
+		count = COUNT_COMM_CACHE
 	}
-	items, err := DB.ListComments(oid, cid, direction, ptk.Offset, limit)
+	items, err := DB.ListComments(oid, cid, ptk.Offset, count+1)
 	if err != nil {
 		return nil, err
 	}
 
-	if limit == COUNT_COMM_CACHE && len(items) > 0 {
-		Cache.InitComms(oid, cid, items, len(items) < limit)
+	if count == COUNT_COMM_CACHE && len(items) > 0 {
+		Cache.InitComms(oid, cid, items, len(items) < count)
 	}
 	return items, nil
 }
 
 func (s *SvrHandler) packCommentInfos(items CommentModels,
-	ptk page.PageToken, direction, uid string) (*pb.CommentInfos, error) {
+	ptk page.PageToken, uid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
-		Items: make([]*pb.CommentInfo, 0),
+		Items:     make([]*pb.CommentInfo, 0),
+		PageToken: "",
 	}
 
-	if ptk.Limit == len(items) {
-		if direction == "lt" || direction == "lte" {
-			ptk.Offset = items[0].CreatedAt
-		} else {
-			ptk.Offset = items[ptk.Limit-1].CreatedAt
-		}
+	if ptk.Limit+1 <= len(items) {
+		ptk.Offset = items[ptk.Limit-1].CreatedAt
 		pagetoken, err := ptk.Encode()
 		if err != nil {
 			return res, err
@@ -257,6 +251,9 @@ func (s *SvrHandler) packCommentInfos(items CommentModels,
 
 	xmap := s.userCommLikes(uid)
 	for _, item := range items {
+		if len(res.Items) == ptk.Limit {
+			break
+		}
 		if _, ok := xmap[item.Cid]; ok {
 			item.IsLiking = true
 		}
@@ -277,10 +274,11 @@ func (s *SvrHandler) packCommentInfo(pitem *CommentModel,
 func (s *SvrHandler) packLikeInfos(items LikeModels,
 	ptk page.PageToken) (*pb.LikeInfos, error) {
 	res := &pb.LikeInfos{
-		Items: make([]*pb.LikeInfo, 0),
+		Items:     make([]*pb.LikeInfo, 0),
+		PageToken: "",
 	}
 
-	if ptk.Limit == len(items) {
+	if ptk.Limit+1 <= len(items) {
 		ptk.Offset = items[ptk.Limit-1].CreatedAt
 		pagetoken, err := ptk.Encode()
 		if err != nil {
@@ -290,6 +288,9 @@ func (s *SvrHandler) packLikeInfos(items LikeModels,
 	}
 
 	for _, item := range items {
+		if len(res.Items) == ptk.Limit {
+			break
+		}
 		res.Items = append(res.Items, item.ConstructPb())
 	}
 	return res, nil

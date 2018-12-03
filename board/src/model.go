@@ -30,6 +30,28 @@ type CommentModel struct {
 }
 
 func (c *CommentModel) ConstructPb() *pb.CommentInfo {
+	replys := make([]*pb.CommentInfo, 0)
+	for _, r := range c.Replys {
+		replys = append(replys, &pb.CommentInfo{
+			Id:         r.Id,
+			Oid:        r.Oid,
+			IsRepost:   r.IsRepost,
+			Cid:        r.Cid,
+			Content:    r.Content,
+			ImgId:      r.ImgEx,
+			ImgEx:      r.ImgId,
+			LikesCount: int32(r.LikesCount),
+			ReplyCount: int32(r.ReplyCount),
+			Author: &pb.UserBaseInfo{
+				Uname:    r.Uname,
+				Uid:      r.Uid,
+				AvatarId: r.AvatarId,
+				AvatarEx: r.AvatarEx,
+			},
+			IsLiking:  r.IsLiking,
+			CreatedAt: r.CreatedAt,
+		})
+	}
 	return &pb.CommentInfo{
 		Id:         c.Id,
 		Oid:        c.Oid,
@@ -47,6 +69,7 @@ func (c *CommentModel) ConstructPb() *pb.CommentInfo {
 			AvatarEx: c.AvatarEx,
 		},
 		IsLiking:  c.IsLiking,
+		Replys:    replys,
 		CreatedAt: c.CreatedAt,
 	}
 }
@@ -74,7 +97,7 @@ func (c CommentModels) Len() int {
 }
 
 func (c CommentModels) Less(i, j int) bool {
-	return c[i].CreatedAt < c[j].CreatedAt
+	return c[i].CreatedAt > c[j].CreatedAt
 }
 
 func (c CommentModels) Swap(i, j int) {

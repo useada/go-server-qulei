@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"a.com/go-server/common/redis"
+	"a.com/go-server/proto/ct"
 )
 
 type CacheHandle struct {
@@ -206,57 +207,29 @@ func (c *CacheHandle) InitZsetComms(oid, cid string,
 	return err
 }
 
-func (c *CacheHandle) ListZsetComms(oid, cid, direction string,
-	stamp int64, limit int) (ids []string, err error) {
+func (c *CacheHandle) ListZsetComms(oid, cid string,
+	stamp int64, limit int) ([]string, error) {
 	zkey := c.KeyZsetComms(oid + cid)
 	if ok := c.CheckZsetCommsKey(zkey); !ok {
 		return nil, errors.New("zset key ttl failed")
 	}
 
-	if count, _ := redis.ZCard(zkey); count == 0 {
-		return nil, errors.New("cache empty")
-	}
-
-	if direction == "gt" || direction == "gte" {
-		return c.ListZsetCommsNewer(zkey, stamp+1, TIMESTAMP_INF, limit)
-	}
-	return c.ListZsetCommsOlder(zkey, stamp-1, 0, limit)
-}
-
-func (c *CacheHandle) ListZsetCommsNewer(zkey string,
-	beg, end int64, limit int) ([]string, error) {
-	ids, err := redis.ZRangeByScore(zkey, beg+1, end, limit)
+	ids, err := redis.ZRevRangeByScore(zkey, stamp-1, ct.TIME_INF_MIN, limit)
 	if err != nil {
-		return ids, err
+		return nil, err
+	}
+	if len(ids) == 0 { // 如果曾经cache过且没有过期，至少会包含GUARD
+		return nil, errors.New("cache zset empty")
 	}
 
-	if ids[0] == "GUARD" {
-		return ids[1:], nil
-	}
-	return ids, err
-}
-
-func (c *CacheHandle) ListZsetCommsOlder(zkey string,
-	end, beg int64, limit int) ([]string, error) {
-	if end == 0 {
-		end = TIMESTAMP_INF
-	}
-	ids, err := redis.ZRevRangeByScore(zkey, end-1, beg, limit)
-	if err != nil {
-		return ids, err
+	if len(ids) < limit && ids[len(ids)-1] != "GUARD" {
+		return nil, errors.New("some data in database")
 	}
 
-	for i, j := 0, len(ids)-1; i < j; i, j = i+1, j-1 {
-		ids[i], ids[j] = ids[j], ids[i]
+	if ids[len(ids)-1] == "GUARD" {
+		return ids[0 : len(ids)-1], nil
 	}
-
-	if len(ids) < limit && ids[0] != "GUARD" {
-		return ids, errors.New("some data in database")
-	}
-	if ids[0] == "GUARD" {
-		return ids[1:], nil
-	}
-	return ids, err
+	return ids, nil
 }
 
 func (c *CacheHandle) PushZsetComm(pitem *CommentModel) error {

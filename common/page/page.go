@@ -13,9 +13,9 @@ type PageToken struct {
 }
 
 // 默认PageToken
-func DefaultPageToken(limit int) (string, error) {
+func Default(offset int64, limit int) (string, error) {
 	bytes, err := json.Marshal(PageToken{
-		Offset: 0,
+		Offset: offset,
 		Limit:  limit,
 	})
 	if err != nil {
