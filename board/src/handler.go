@@ -63,10 +63,12 @@ func (s *SvrHandler) NewComment(ctx context.Context,
 		return nil, err
 	}
 
-	if err := DB.IncrCommReply(in.Cid, pitem); err == nil {
-		Cache.DelHashComm(in.Oid, in.Cid)
-	} else {
-		Log.Error("incr reply oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
+	if len(in.Cid) != 0 { // 二级评论，更新一级评论数据
+		if err := DB.IncrCommReply(in.Cid, pitem); err == nil {
+			Cache.DelHashComm(in.Oid, in.Cid)
+		} else {
+			Log.Error("incr reply oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
+		}
 	}
 
 	if err := DB.IncrSummaryComm(in.Cid, in.Oid); err == nil {
@@ -86,10 +88,12 @@ func (s *SvrHandler) DelComment(ctx context.Context,
 		return nil, err
 	}
 
-	if err := DB.DecrCommReply(in.Cid, in.Id); err == nil {
-		Cache.DelHashComm(in.Oid, in.Cid)
-	} else {
-		Log.Error("decr reply oid:%s id:%s err:%v", in.Oid, in.Id, err)
+	if len(in.Cid) != 0 { // 二级评论，更新一级评论数据
+		if err := DB.DecrCommReply(in.Cid, in.Id); err == nil {
+			Cache.DelHashComm(in.Oid, in.Cid)
+		} else {
+			Log.Error("decr reply oid:%s id:%s err:%v", in.Oid, in.Id, err)
+		}
 	}
 
 	if err := DB.DecrSummaryComm(in.Cid, in.Oid, 1); err == nil {

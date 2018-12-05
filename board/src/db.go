@@ -55,9 +55,6 @@ func (db *DbHandle) DelComment(id string) error {
 }
 
 func (db *DbHandle) IncrCommReply(cid string, pitem *CommentModel) error {
-	if len(cid) == 0 {
-		return nil
-	}
 	handle := func(c *mgo.Collection) error {
 		replys := bson.M{"$each": CommentModels{*pitem},
 			"$sort": bson.M{"created_at": -1}, "$slice": 2}
@@ -69,9 +66,6 @@ func (db *DbHandle) IncrCommReply(cid string, pitem *CommentModel) error {
 }
 
 func (db *DbHandle) DecrCommReply(cid, rid string) error {
-	if len(cid) == 0 {
-		return nil
-	}
 	handle := func(c *mgo.Collection) error {
 		return c.Update(bson.M{"_id": cid},
 			bson.M{"$pull": bson.M{"replys": bson.M{"_id": rid}},
