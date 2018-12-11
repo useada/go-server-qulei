@@ -218,9 +218,9 @@ func (b *BoardHandler) DelLike(ctx *gin.Context) *JsonResponse {
 
 func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JsonResponse {
 	var args struct {
-		Oids []string `form:"oids"`
+		Oids []string `json:"oids" binding:"required"`
 	}
-	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
+	if err := ctx.ShouldBindWith(&args, binding.JSON); err != nil {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 

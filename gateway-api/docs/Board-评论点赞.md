@@ -1,6 +1,6 @@
 ### Board 接口
 
-#### 1. 拉取评论列表
+#### 1. 评论列表
 
 ---
 
@@ -103,7 +103,7 @@ GET
 ```
 ---
 
-#### 2. 获取一条评论
+#### 2. 获取评论
 
 ---
 
@@ -167,7 +167,7 @@ GET
 ```
 ---
 
-#### 3. 创建一条评论
+#### 3. 创建评论
 
 ---
 
@@ -218,6 +218,442 @@ POST
     "msg": "OK",
     "data": {
         "id": "bg2h5dgscsgg39kdhjl0"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 4. 删除评论
+
+---
+
+##### 必须Auth认证
+```
+是
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oid": "test_oid_00001",
+  "id": "bg2csq8scsgjultl73eg"
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/comm/del
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "id": "bg2foroscsgmt2ta60d0"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 5. 评论点赞
+
+---
+
+##### 必须Auth认证
+```
+是
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oid": "test_oid_00001",
+  "cid": "bg2fpmoscsgmt2ta60fg"
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/comm/like
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "id": "testuidbg2fpmoscsgmt2ta60fg"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 6. 评论取消点赞
+
+---
+
+##### 必须Auth认证
+```
+是
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oid": "test_oid_00001",
+  "cid": "bg2fq70scsgmt2ta60g0"
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/comm/unlike
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "id": "testuidbg2fpmoscsgmt2ta60fg"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 7. 点赞列表
+
+---
+
+##### 必须Auth认证
+```
+否
+```
+
+---
+
+##### 请求参数
+
+| | 必选 | 类型 | 说明 |
+|---------|----|-------------|-------------|
+| oid | y | string |对象(feed) id |
+| page_token  | n | string | 分页token|
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/like/list?oid=test_oid_00001&page_token=
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "items": [
+            {
+                "id": "testuidtest_oid_00001",
+                "oid": "test_oid_00001",
+                "author": {
+                    "uid": "testuid"
+                }
+            }
+        ]
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 8. 创建点赞
+
+---
+
+##### 必须Auth认证
+```
+是
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oid": "test_oid_00001"
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/like/new
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "id": "testuidtest_oid_00001"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 9. 取消点赞
+
+---
+
+##### 必须Auth认证
+```
+是
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oid": "test_oid_00001"
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/like/del
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "id": "testuidtest_oid_00001"
+    }
+}
+```
+
+```
+错误返回值
+{
+    "code": "4000",
+    "msg": "Key: '.Oid' Error:Field validation for 'Oid' failed on the 'required' tag",
+    "data": null
+}
+```
+---
+
+#### 10. 评论点赞汇总
+
+---
+
+##### 必须Auth认证
+```
+否
+```
+
+---
+
+##### 请求参数
+
+```
+{
+  "oids": ["test_oid_00001"]
+}
+```
+
+---
+
+##### 请求方法
+```
+POST
+```
+
+---
+
+##### 调用样例
+
+```
+192.168.200.120:8091/v1/board/summary/mget
+```
+
+---
+
+##### 返回结果
+
+
+```
+正确返回值
+{
+    "code": "2000",
+    "msg": "OK",
+    "data": {
+        "items": [
+            {
+                "id": "test_oid_00001",
+                "comms_count": 45,
+                "comms_first_count": 41
+            }
+        ]
     }
 }
 ```

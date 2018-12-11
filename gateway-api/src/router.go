@@ -20,7 +20,7 @@ func Router() *gin.Engine {
 		board.GET("/board/like/list", ResponseWrapper(Board.ListLikes))
 		board.POST("/board/like/new", ResponseWrapper(Board.NewLike))
 		board.POST("/board/like/del", ResponseWrapper(Board.DelLike))
-		board.GET("/board/summary/mget", ResponseWrapper(Board.MutiGetSummary)) // 应该在feed接口里被调用
+		board.POST("/board/summary/mget", ResponseWrapper(Board.MutiGetSummary)) // 应该在feed接口里被调用
 	}
 
 	search := r.Group("/v1/")
