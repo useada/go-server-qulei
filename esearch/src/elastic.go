@@ -10,26 +10,28 @@ type EsHandle struct {
 	Client *elastic.Client
 }
 
-var ES *EsHandle
+var ES = &EsHandle{}
 
-func InitElasticClient(conf ElasticConfigor) (err error) {
-	ES = &EsHandle{}
+func InitElasticClient(conf ElasticConfigor) error {
+	var err error
 	ES.Client, err = elastic.NewClient(elastic.SetURL(conf.Hosts...))
 	return err
 }
 
 func (es *EsHandle) UsersByName(name string,
 	offset, limit int) ([]SearchModel, error) {
-	queryer := elastic.NewBoolQuery()
-	queryer = queryer.Should(elastic.NewQueryStringQuery(name).Field("name"))
-
 	items := make([]SearchModel, 0)
+	if offset+limit > 10000 {
+		return items, nil
+	}
+
+	queryer := elastic.NewBoolQuery().
+		Should(elastic.NewQueryStringQuery(name).Field("name"))
 	res, err := es.Client.Search().Index("user").Query(queryer).
 		From(offset).Size(limit).Do(context.Background())
 	if err != nil {
 		return items, err
 	}
-
 	if res.Hits.TotalHits == 0 {
 		return items, nil
 	}
@@ -40,16 +42,17 @@ func (es *EsHandle) UsersByName(name string,
 	return items, err
 }
 
-func (es *EsHandle) UsersByNear(lat, lon float64, gender,
-	offset, limit int) ([]SearchModel, error) {
-	queryer := elastic.NewBoolQuery()
-	queryer = queryer.Filter(elastic.NewTermQuery("state", 0),
-		elastic.NewGeoDistanceQuery("geo").Point(lat, lon).Distance("10km"))
+func (es *EsHandle) UsersByNear(lat, lon float64,
+	gender, offset, limit int) ([]SearchModel, error) {
+	items := make([]SearchModel, 0)
+	if offset+limit > 10000 {
+		return items, nil
+	}
 
+	queryer := elastic.NewBoolQuery().Filter(elastic.NewTermQuery("state", 0),
+		elastic.NewGeoDistanceQuery("geo").Point(lat, lon).Distance("10km"))
 	sorter := elastic.NewGeoDistanceSort("geo").
 		Point(lat, lon).Asc().Unit("km").SortMode("min").GeoDistance("plane")
-
-	items := make([]SearchModel, 0)
 	res, err := es.Client.Search().Index("user").Query(queryer).
 		SortBy(sorter).From(offset).Size(limit).Do(context.Background())
 	if err != nil {

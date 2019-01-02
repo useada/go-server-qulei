@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package pb;
+ 
+service Uauth {
+    rpc Login(AuthLoginArgs) returns (AuthTokenInfo) {}      // 登录/注册 (phone/wechat/qicq)
+    rpc Passwd(AuthPasswdArgs) returns (AuthTokenInfo) {}    // 设置密码
+    rpc Refresh(AuthRefreshArgs) returns (AuthTokenInfo) {}  // 刷新token
+
+    rpc Bind(AuthBindArgs) returns (AuthUserInfo) {}         // 绑定认证信息
+    rpc UnBind(AuthUnBindArgs) returns (AuthUserInfo) {}     // 解除绑定认证信息
+    rpc Get(AuthGetArgs) returns (AuthUserInfo) {}           // 获取用户认证相关信息
+}
+
+// 认证方式 密码/短信/微信/QQ
+enum AuthMethod {
+    PASSWD = 0;
+    SMS    = 1;
+    WECHAT = 2;
+    QICQ   = 3;
+}
+
+// -- Request
+
+message AuthLoginArgs {
+    AuthMethod method = 1; // phone:passwd / phone:code / wechat(openid):token / qicq(openid):token
+    string     openid = 2; // phone / wechat(openid) / qicq(openid)
+    string     code   = 3; // passwd / sms-code / wechat(token) / qicq(token)
+    string     device = 4;
+}
+
+message AuthPasswdArgs {
+    string id   = 1; // uid
+    string code = 2; // 短信验证码
+    string pass = 3; // 新密码
+}
+
+message AuthRefreshArgs {
+    string refresh_token = 1;
+}
+
+message AuthBindArgs {
+    AuthMethod method = 1; // phone:code / wechat(openid):token / qicq(openid):token
+    string     id     = 2; // uid
+    string     openid = 3; // phone / wechat(openid) / qicq(openid)
+    string     code   = 4; // sms-code / wechat(token) / qicq(token)
+}
+
+message AuthUnBindArgs {
+    AuthMethod method = 1; // phone:code / wechat(openid):token / qicq(openid):token
+    string     id     = 2; // uid
+}
+
+message AuthGetArgs {
+    string id = 1; // uid
+}
+
+// -- Reponse
+
+message AuthTokenInfo {
+    string access_token  = 1;
+    string refresh_token = 2;
+}
+
+message AuthUserInfo {
+    string id     = 1;
+    string phone  = 2;
+    string wechat = 3;
+    string qicq   = 4;
+}

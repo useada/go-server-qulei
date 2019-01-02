@@ -50,7 +50,10 @@ GET
                 "reply_count": 3,
                 "created_at": 1543831011790,
                 "author": {
-                    "uid": "testuid"
+                    "uid": "testuid",
+                    "uname": "",
+                    "avatar_id": "",
+                    "avatar_ex": ""
                 },
                 "replys": [
                     {
@@ -60,7 +63,10 @@ GET
                         "content": "Hello, this is NO 41 - 04 comment.",
                         "created_at": 1543836342689,
                         "author": {
-                            "uid": "testuid"
+                            "uid": "testuid",
+                            "uname": "",
+                            "avatar_id": "",
+                            "avatar_ex": ""
                         }
                     },
                     {
@@ -70,7 +76,10 @@ GET
                         "content": "Hello, this is NO 41 - 03 comment.",
                         "created_at": 1543836337567,
                         "author": {
-                            "uid": "testuid"
+                            "uid": "testuid",
+                            "uname": "",
+                            "avatar_id": "",
+                            "avatar_ex": ""
                         }
                     }
                 ]
@@ -84,7 +93,10 @@ GET
                 "content": "Hello, this is NO 22 comment.",
                 "created_at": 1543830371100,
                 "author": {
-                    "uid": "testuid"
+                    "uid": "testuid",
+                    "uname": "",
+                    "avatar_id": "",
+                    "avatar_ex": ""
                 }
             }
         ],
@@ -151,7 +163,10 @@ GET
         "content": "Hello, this is NO 21 comment.",
         "created_at": 1543818925008,
         "author": {
-            "uid": "testuid"
+            "uid": "testuid",
+            "uname": "",
+            "avatar_id": "",
+            "avatar_ex": ""
         }
     }
 }
@@ -464,7 +479,10 @@ POST
                 "id": "testuidtest_oid_00001",
                 "oid": "test_oid_00001",
                 "author": {
-                    "uid": "testuid"
+                    "uid": "testuid",
+                    "uname": "",
+                    "avatar_id": "",
+                    "avatar_ex": ""
                 }
             }
         ]

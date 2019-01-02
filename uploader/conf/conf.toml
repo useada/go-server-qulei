@@ -15,6 +15,7 @@ bucket= "test-bucket"
 [mysql]
 host = "192.168.200.191:3306"
 auth = "mysql_user:V3CSDJ3Gtg"
+option = "charset=utf8mb4"
 max_idle = 5
-max_open = 20
+max_open = 30
 database = ["uploader"]

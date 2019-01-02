@@ -1,4 +1,4 @@
-package json
+package st
 
 type BaseIterface interface {
 	GetId() string

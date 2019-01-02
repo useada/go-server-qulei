@@ -18,6 +18,7 @@ type ConsulConfigor struct {
 type MysqlConfigor struct {
 	Host     string
 	Auth     string
+	Option   string
 	MaxIdle  int `toml:"max_idle"`
 	MaxOpen  int `toml:"max_open"`
 	Database []string

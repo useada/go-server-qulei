@@ -1,0 +1,22 @@
+[server]
+name = "uauth"
+host = ":18094"
+port = 18094
+logpath = "/data/logs/uauth/"
+
+[consul]
+host = "192.168.200.191:8500"
+
+[redis]
+host = "192.168.200.191:6379"
+auth = ""
+index = 14 
+max_idle = 10
+
+[mysql]
+host = "192.168.200.191:3306"
+auth = "mysql_user:V3CSDJ3Gtg"
+option = "charset=utf8mb4"
+max_idle = 5
+max_open = 30
+database = ["uauth"]

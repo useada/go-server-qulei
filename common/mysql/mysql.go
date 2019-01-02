@@ -24,6 +24,9 @@ func Init(conf configor.MysqlConfigor) error {
 	gGorm = make(map[string]*gorm.DB)
 	for _, db := range conf.Database {
 		dst := fmt.Sprintf("%s@tcp(%s)/%s", conf.Auth, conf.Host, db)
+		if len(conf.Option) > 0 {
+			dst = dst + "?" + conf.Option
+		}
 		fmt.Println("连接Mysql:", dst)
 
 		orm, err := gorm.Open("mysql", dst)
