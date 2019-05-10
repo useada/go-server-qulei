@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"go.uber.org/zap"
 
 	"a.com/go-server/common/configor"
-	"a.com/go-server/common/minilog"
+	"a.com/go-server/common/logger"
 	"a.com/go-server/gclient"
 )
 
 type Configor struct {
 	Server configor.ServerConfigor
+	Logger configor.LoggerConfigor
 	Grpc   GrpcClients
 }
 
@@ -20,7 +21,7 @@ type GrpcClients struct {
 
 var (
 	Conf Configor
-	Log  *minilog.Logger
+	Log  *zap.SugaredLogger
 )
 
 func init() {
@@ -28,13 +29,12 @@ func init() {
 		panic(err)
 	}
 
+	Log = logger.InitLogger(Conf.Logger)
+
 	if err := gclient.Init(Conf.Grpc.Consul, Conf.Grpc.Services); err != nil {
 		panic(err)
 	}
-	fmt.Println(Conf.Grpc.Consul, Conf.Grpc.Services)
-
-	Log = minilog.NewLogger(Conf.Server.LogPath, "api", 5000)
-	Log.WithFileLine("FATAL", "DEBG")
+	Log.Info(Conf.Grpc.Consul, Conf.Grpc.Services)
 }
 
 func main() {

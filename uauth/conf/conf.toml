@@ -4,6 +4,14 @@ host = ":18094"
 port = 18094
 logpath = "/data/logs/uauth/"
 
+[logger]
+file_path = "/Users/qulei/workspace/src/a.com/go-server/uauth/logs/logs.log"
+max_size = 1024   # 1G
+max_backups = 2   # 2 copy
+max_age = 20      # 20 days
+level = 0         # INFO
+compress = false
+
 [consul]
 host = "192.168.200.191:8500"
 

@@ -5,10 +5,9 @@ import (
 )
 
 type ServerConfigor struct {
-	Name    string
-	Host    string
-	Port    int
-	LogPath string
+	Name string
+	Host string
+	Port int
 }
 
 type ConsulConfigor struct {
@@ -35,6 +34,15 @@ type RedisConfigor struct {
 	Auth    string
 	Index   int
 	MaxIdle int `toml:"max_idle"`
+}
+
+type LoggerConfigor struct {
+	FilePath   string `toml:"file_path"`
+	MaxSize    int    `toml:"max_size"`
+	MaxBackups int    `toml:"max_backups"`
+	MaxAge     int    `toml:"max_age"`
+	Level      int
+	Compress   bool
 }
 
 func LoadConfig(path string, v interface{}) error {

@@ -4,6 +4,14 @@ host = ":18091"
 port = 18091
 logpath = "/data/logs/uploader/"
 
+[logger]
+file_path = "/Users/qulei/workspace/src/a.com/go-server/uploader/logs/logs.log"
+max_size = 1024   # 1G
+max_backups = 2   # 2 copy
+max_age = 20      # 20 days
+level = 0         # INFO
+compress = false
+
 [consul]
 host = "192.168.200.191:8500"
 

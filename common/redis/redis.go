@@ -369,15 +369,18 @@ func Init(conf configor.RedisConfigor) {
 	fmt.Println("初始化Redis连接池")
 	gRedigo = &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", conf.Host,
-				redis.DialConnectTimeout(time.Duration(500)*time.Millisecond),
-				redis.DialReadTimeout(time.Duration(500)*time.Millisecond),
-				redis.DialWriteTimeout(time.Duration(500)*time.Millisecond))
+			c, err := redis.Dial("tcp", conf.Host)
 			if nil != err {
 				return nil, err
 			}
 			if conf.Auth != "" {
 				if _, err := c.Do("AUTH", conf.Auth); err != nil {
+					c.Close()
+					return nil, err
+				}
+			} else {
+				// check with PING
+				if _, err := c.Do("PING"); err != nil {
 					c.Close()
 					return nil, err
 				}
@@ -388,7 +391,14 @@ func Init(conf configor.RedisConfigor) {
 			}
 			return c, nil
 		},
-		MaxIdle:   conf.MaxIdle,
-		MaxActive: conf.MaxIdle * 100,
+		// custom connection test method
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if _, err := c.Do("PING"); err != nil {
+				return err
+			}
+			return nil
+		},
+		MaxIdle:     conf.MaxIdle,
+		IdleTimeout: 240 * time.Second,
 	}
 }

@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"net"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"a.com/go-server/common/configor"
 	"a.com/go-server/common/consul"
 	"a.com/go-server/common/locip"
-	"a.com/go-server/common/minilog"
+	"a.com/go-server/common/logger"
 )
 
 type Configor struct {
 	Server  configor.ServerConfigor
+	Logger  configor.LoggerConfigor
 	Consul  configor.ConsulConfigor
 	Elastic ElasticConfigor
 }
@@ -25,7 +27,7 @@ type ElasticConfigor struct {
 
 var (
 	Conf  Configor
-	Log   *minilog.Logger
+	Log   *zap.SugaredLogger
 	LocIP string
 )
 
@@ -43,8 +45,7 @@ func init() {
 		panic(err)
 	}
 
-	Log = minilog.NewLogger(Conf.Server.LogPath, "server", 5000)
-	Log.WithFileLine("FATAL", "DEBG")
+	Log = logger.InitLogger(Conf.Logger)
 }
 
 func main() {
