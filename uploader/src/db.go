@@ -16,14 +16,14 @@ func (db *DbHandle) GetFileInfo(fid string) (*FileInfoModel, error) {
 	handle := func(orm *gorm.DB) error {
 		return orm.Where("fid=?", fid).Find(pitem).Error
 	}
-	return pitem, mysql.Doit(db.DataBase(), handle)
+	return pitem, mysql.Slave(db.DataBase()).Doit(handle)
 }
 
 func (db *DbHandle) AddFileInfo(item *FileInfoModel) error {
 	handle := func(orm *gorm.DB) error {
 		return orm.Create(item).Error
 	}
-	return mysql.Doit(db.DataBase(), handle)
+	return mysql.Master(db.DataBase()).Doit(handle)
 }
 
 func (db *DbHandle) DataBase() string {

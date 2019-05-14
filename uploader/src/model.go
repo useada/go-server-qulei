@@ -18,7 +18,7 @@ func (f *FileInfoModel) ConstructPb() *pb.FileInfo {
 		Type:   pb.TYPE(f.Type),
 		Width:  int32(f.Width),
 		Height: int32(f.Height),
-		Size:   f.Size,
+		Size_:  f.Size,
 	}
 }
 

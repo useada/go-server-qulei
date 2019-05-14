@@ -19,7 +19,7 @@ type Configor struct {
 	Logger configor.LoggerConfigor
 	Consul configor.ConsulConfigor
 	S3     S3Configor
-	Mysql  configor.MysqlConfigor
+	Mysql  []configor.MysqlConfigor
 }
 
 type S3Configor struct {

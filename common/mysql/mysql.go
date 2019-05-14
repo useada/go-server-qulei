@@ -2,42 +2,34 @@ package mysql
 
 import (
 	"errors"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-
-	"a.com/go-server/common/configor"
 )
 
-func Doit(db string, h func(*gorm.DB) error) error {
-	orm, ok := gGorm[db]
+func Master(dbname string) *Client {
+	instance, ok := gInstance[dbname]
 	if !ok {
-		return errors.New("mysql orm is nil")
+		return nil
 	}
-	return h(orm)
+	return instance.getMaster()
 }
 
-var gGorm map[string]*gorm.DB
-
-func Init(conf configor.MysqlConfigor) error {
-	gGorm = make(map[string]*gorm.DB)
-	for _, db := range conf.Database {
-		dst := fmt.Sprintf("%s@tcp(%s)/%s", conf.Auth, conf.Host, db)
-		if len(conf.Option) > 0 {
-			dst = dst + "?" + conf.Option
-		}
-		fmt.Println("连接Mysql:", dst)
-
-		orm, err := gorm.Open("mysql", dst)
-		if err != nil {
-			fmt.Println("Mysql数据库: ", db, "连接异常! ", err)
-			return err
-		}
-		orm.LogMode(true)
-		orm.DB().SetMaxIdleConns(conf.MaxIdle)
-		orm.DB().SetMaxOpenConns(conf.MaxOpen)
-		gGorm[db] = orm
+func Slave(dbname string) *Client {
+	instance, ok := gInstance[dbname]
+	if !ok {
+		return nil
 	}
-	return nil
+	return instance.getSlave()
+}
+
+type Client struct {
+	*gorm.DB
+}
+
+func (c *Client) Doit(h func(*gorm.DB) error) error {
+	if c == nil {
+		return errors.New("mysql instance is nil")
+	}
+	return h(c.DB)
 }

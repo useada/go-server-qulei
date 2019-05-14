@@ -33,3 +33,22 @@ wait.Wait()
 
 return resp
 ```
+
+errgroup 遇到错误取消整个goroutine
+```
+import "golang.org/x/sync/errgroup"
+......
+eg, ctx := errgroup.WithContext(context.TODO())
+for _, w := range work {
+		w := w
+		eg.Go(func() error {
+			// Do something with w and
+			// listen for ctx cancellation
+		})
+}
+// If any of the goroutines returns an error ctx will be
+// canceled and err will be non-nil.
+if err := eg.Wait(); err != nil {
+	return err
+}
+```

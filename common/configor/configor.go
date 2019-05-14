@@ -14,13 +14,17 @@ type ConsulConfigor struct {
 	Host string
 }
 
+type MysqlNode struct {
+	Host    string
+	Auth    string
+	MaxIdle int `toml:"max_idle"`
+	MaxOpen int `toml:"max_open"`
+}
 type MysqlConfigor struct {
-	Host     string
-	Auth     string
-	Option   string
-	MaxIdle  int `toml:"max_idle"`
-	MaxOpen  int `toml:"max_open"`
-	Database []string
+	Name   string
+	Option string
+	Master MysqlNode
+	Slave  []MysqlNode
 }
 
 type MongoConfigor struct {
