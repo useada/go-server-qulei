@@ -1,3 +1,4 @@
+# 可参照uploader服务
 ```
 import (
     "a.com/go-server/common/mysql"
@@ -5,7 +6,7 @@ import (
 
 // 全局初始化调用一次
 func init() {
-    if err := mysql.Init(conf); err != nil {
+    if err := mysql.Init(Conf.Mysql); err != nil {
         panic(err)
     }
 }
@@ -17,6 +18,6 @@ func DemoGetMysqlData(state int) ([]TmpData, error) {
         return orm.Where("state=?", state).Find(&items).Error
     }
     //下面的语句没有指定表名, test是库名，可以在TmpData处指定表名， 参见GORM
-    return items, mysql.Doit("test", handle)
+    return items, mysql.Master("test").Doit(handle)
 }
 ```
