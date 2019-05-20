@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +15,7 @@ type CacheHandle struct {
 
 var Cache = &CacheHandle{}
 
-func (c *CacheHandle) InitComms(oid, cid string,
+func (c *CacheHandle) InitComms(ctx context.Context, oid, cid string,
 	items CommentModels, total bool) error {
 	zsetArgs := make([]interface{}, 0)
 	hashArgs := make([]interface{}, 0)
@@ -35,26 +36,26 @@ func (c *CacheHandle) InitComms(oid, cid string,
 	if len(items) > 0 {
 		firststamp = items[0].CreatedAt
 	}
-	c.InitHashComms(oid, hashArgs)
-	return c.InitZsetComms(oid, cid, firststamp, zsetArgs)
+	c.InitHashComms(ctx, oid, hashArgs)
+	return c.InitZsetComms(ctx, oid, cid, firststamp, zsetArgs)
 }
 
-func (c *CacheHandle) PushComment(pitem *CommentModel) error {
-	c.SetHashComm(pitem)
-	return c.PushZsetComm(pitem)
+func (c *CacheHandle) PushComment(ctx context.Context, pitem *CommentModel) error {
+	c.SetHashComm(ctx, pitem)
+	return c.PushZsetComm(ctx, pitem)
 }
 
-func (c *CacheHandle) PopComment(oid, cid, id string) error {
-	c.DelHashComm(oid, id)
-	return c.PopZsetComm(oid, cid, id)
+func (c *CacheHandle) PopComment(ctx context.Context, oid, cid, id string) error {
+	c.DelHashComm(ctx, oid, id)
+	return c.PopZsetComm(ctx, oid, cid, id)
 }
 
-func (c *CacheHandle) MutiGetSummary(oids []string) (SummaryModels, error) {
+func (c *CacheHandle) MutiGetSummary(ctx context.Context, oids []string) (SummaryModels, error) {
 	keys := make([]string, 0)
 	for _, oid := range oids {
 		keys = append(keys, c.KeySummary(oid))
 	}
-	vals, err := redis.MGetBytes(keys)
+	vals, err := redis.MGetBytes(ctx, keys)
 	if err != nil {
 		return nil, err
 	}
@@ -70,28 +71,28 @@ func (c *CacheHandle) MutiGetSummary(oids []string) (SummaryModels, error) {
 	return items, err
 }
 
-func (c *CacheHandle) NewSummary(pitem *SummaryModel) error {
+func (c *CacheHandle) NewSummary(ctx context.Context, pitem *SummaryModel) error {
 	data, err := json.Marshal(pitem)
 	if err != nil {
 		return err
 	}
-	return redis.Set(c.KeySummary(pitem.Id), data, 3600)
+	return redis.Set(ctx, c.KeySummary(pitem.Id), data, 3600)
 }
 
-func (c *CacheHandle) DelSummary(oid string) error {
-	return redis.Delete(c.KeySummary(oid))
+func (c *CacheHandle) DelSummary(ctx context.Context, oid string) error {
+	return redis.Delete(ctx, c.KeySummary(oid))
 }
 
-func (c *CacheHandle) ListUserCommLikes(uid string) (CommentLikeModels, error) {
+func (c *CacheHandle) ListUserCommLikes(ctx context.Context, uid string) (CommentLikeModels, error) {
 	items := CommentLikeModels{}
-	data, err := redis.GetBytes(c.KeyUserCommLikes(uid))
+	data, err := redis.GetBytes(ctx, c.KeyUserCommLikes(uid))
 	if err != nil {
 		return items, err
 	}
 	return items, json.Unmarshal(data, &items)
 }
 
-func (c *CacheHandle) NewUserCommLikes(uid string,
+func (c *CacheHandle) NewUserCommLikes(ctx context.Context, uid string,
 	items CommentLikeModels) error {
 	if len(items) == 0 {
 		return nil
@@ -101,23 +102,23 @@ func (c *CacheHandle) NewUserCommLikes(uid string,
 	if err != nil {
 		return err
 	}
-	return redis.Set(c.KeyUserCommLikes(uid), data, 3600*24)
+	return redis.Set(ctx, c.KeyUserCommLikes(uid), data, 3600*24)
 }
 
-func (c *CacheHandle) DelUserCommLikes(uid string) error {
-	return redis.Delete(c.KeyUserCommLikes(uid))
+func (c *CacheHandle) DelUserCommLikes(ctx context.Context, uid string) error {
+	return redis.Delete(ctx, c.KeyUserCommLikes(uid))
 }
 
-func (c *CacheHandle) ListUserLikes(uid string) (LikeModels, error) {
+func (c *CacheHandle) ListUserLikes(ctx context.Context, uid string) (LikeModels, error) {
 	items := LikeModels{}
-	data, err := redis.GetBytes(c.KeyUserLikes(uid))
+	data, err := redis.GetBytes(ctx, c.KeyUserLikes(uid))
 	if err != nil {
 		return items, err
 	}
 	return items, json.Unmarshal(data, &items)
 }
 
-func (c *CacheHandle) NewUserLikes(uid string, items LikeModels) error {
+func (c *CacheHandle) NewUserLikes(ctx context.Context, uid string, items LikeModels) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -126,36 +127,36 @@ func (c *CacheHandle) NewUserLikes(uid string, items LikeModels) error {
 	if err != nil {
 		return err
 	}
-	return redis.Set(c.KeyUserLikes(uid), data, 3600*24)
+	return redis.Set(ctx, c.KeyUserLikes(uid), data, 3600*24)
 }
 
-func (c *CacheHandle) DelUserLikes(uid string) error {
-	return redis.Delete(c.KeyUserLikes(uid))
+func (c *CacheHandle) DelUserLikes(ctx context.Context, uid string) error {
+	return redis.Delete(ctx, c.KeyUserLikes(uid))
 }
 
 // -- Hash
 
-func (c *CacheHandle) InitHashComms(oid string, vals []interface{}) error {
+func (c *CacheHandle) InitHashComms(ctx context.Context, oid string, vals []interface{}) error {
 	hkey := c.KeyHashComms(oid)
-	err := redis.HMSet(hkey, vals)
+	err := redis.HMSet(ctx, hkey, vals)
 	if err == nil {
-		redis.Expire(hkey, TTL_HASH_KEY)
+		redis.Expire(ctx, hkey, TTL_HASH_KEY)
 	}
 	return err
 }
 
-func (c *CacheHandle) GetHashComm(oid, id string) (*CommentModel, error) {
+func (c *CacheHandle) GetHashComm(ctx context.Context, oid, id string) (*CommentModel, error) {
 	pitem := &CommentModel{}
-	val, err := redis.HGetBytes(c.KeyHashComms(oid), id)
+	val, err := redis.HGetBytes(ctx, c.KeyHashComms(oid), id)
 	if err != nil {
 		return pitem, err
 	}
 	return pitem, json.Unmarshal(val, pitem)
 }
 
-func (c *CacheHandle) MutiGetHashComms(oid string,
+func (c *CacheHandle) MutiGetHashComms(ctx context.Context, oid string,
 	ids []string) (CommentModels, error) {
-	vals, err := redis.HMGetBytes(c.KeyHashComms(oid), ids)
+	vals, err := redis.HMGetBytes(ctx, c.KeyHashComms(oid), ids)
 	if err != nil {
 		return nil, err
 	}
@@ -171,50 +172,50 @@ func (c *CacheHandle) MutiGetHashComms(oid string,
 	return items, nil
 }
 
-func (c *CacheHandle) SetHashComm(pitem *CommentModel) error {
+func (c *CacheHandle) SetHashComm(ctx context.Context, pitem *CommentModel) error {
 	val, err := json.Marshal(pitem)
 	if err != nil {
 		return err
 	}
 
 	hkey := c.KeyHashComms(pitem.Oid)
-	if err = redis.HSet(hkey, pitem.Id, val); err == nil {
-		redis.Expire(hkey, TTL_HASH_KEY)
+	if err = redis.HSet(ctx, hkey, pitem.Id, val); err == nil {
+		redis.Expire(ctx, hkey, TTL_HASH_KEY)
 	}
 	return err
 }
 
-func (c *CacheHandle) DelHashComm(oid, id string) error {
+func (c *CacheHandle) DelHashComm(ctx context.Context, oid, id string) error {
 	if len(oid) == 0 || len(id) == 0 {
 		return nil
 	}
-	return redis.HDel(c.KeyHashComms(oid), id)
+	return redis.HDel(ctx, c.KeyHashComms(oid), id)
 }
 
 // -- ZSET
 
-func (c *CacheHandle) InitZsetComms(oid, cid string,
+func (c *CacheHandle) InitZsetComms(ctx context.Context, oid, cid string,
 	stamp int64, vals []interface{}) error {
 	zkey := c.KeyZsetComms(oid + cid)
-	redis.ZRemByScore(zkey, 0, stamp)
+	redis.ZRemByScore(ctx, zkey, 0, stamp)
 
-	err := redis.ZMAdd(zkey, vals)
+	err := redis.ZMAdd(ctx, zkey, vals)
 	if err != nil {
-		redis.Delete(zkey)
+		redis.Delete(ctx, zkey)
 	} else {
-		redis.Expire(zkey, TTL_ZSET_KEY)
+		redis.Expire(ctx, zkey, TTL_ZSET_KEY)
 	}
 	return err
 }
 
-func (c *CacheHandle) ListZsetComms(oid, cid string,
+func (c *CacheHandle) ListZsetComms(ctx context.Context, oid, cid string,
 	stamp int64, limit int) ([]string, error) {
 	zkey := c.KeyZsetComms(oid + cid)
-	if ok := c.CheckZsetCommsKey(zkey); !ok {
+	if ok := c.CheckZsetCommsKey(ctx, zkey); !ok {
 		return nil, errors.New("zset key ttl failed")
 	}
 
-	ids, err := redis.ZRevRangeByScore(zkey, stamp-1, ct.TIME_INF_MIN, limit)
+	ids, err := redis.ZRevRangeByScore(ctx, zkey, stamp-1, ct.TIME_INF_MIN, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -232,34 +233,34 @@ func (c *CacheHandle) ListZsetComms(oid, cid string,
 	return ids, nil
 }
 
-func (c *CacheHandle) PushZsetComm(pitem *CommentModel) error {
+func (c *CacheHandle) PushZsetComm(ctx context.Context, pitem *CommentModel) error {
 	zkey := c.KeyZsetComms(pitem.Oid + pitem.Cid)
-	err := redis.ZAdd(zkey, pitem.CreatedAt, pitem.Id)
+	err := redis.ZAdd(ctx, zkey, pitem.CreatedAt, pitem.Id)
 	if err != nil {
-		redis.Delete(zkey)
+		redis.Delete(ctx, zkey)
 	} else {
-		redis.Expire(zkey, TTL_ZSET_KEY)
+		redis.Expire(ctx, zkey, TTL_ZSET_KEY)
 	}
 	return err
 }
 
-func (c *CacheHandle) PopZsetComm(oid, cid, id string) error {
+func (c *CacheHandle) PopZsetComm(ctx context.Context, oid, cid, id string) error {
 	zkey := c.KeyZsetComms(oid + cid)
-	if ok := c.CheckZsetCommsKey(zkey); !ok {
+	if ok := c.CheckZsetCommsKey(ctx, zkey); !ok {
 		return errors.New("check zset key ttl error")
 	}
 
-	err := redis.ZRem(zkey, id)
+	err := redis.ZRem(ctx, zkey, id)
 	if err != nil {
-		redis.Delete(zkey)
+		redis.Delete(ctx, zkey)
 	} else {
-		redis.Expire(zkey, TTL_ZSET_KEY)
+		redis.Expire(ctx, zkey, TTL_ZSET_KEY)
 	}
 	return err
 }
 
-func (c *CacheHandle) CheckZsetCommsKey(zkey string) bool {
-	val, err := redis.KeyTTL(zkey)
+func (c *CacheHandle) CheckZsetCommsKey(ctx context.Context, zkey string) bool {
+	val, err := redis.KeyTTL(ctx, zkey)
 	if err != nil {
 		return false
 	}

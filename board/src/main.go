@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
@@ -13,6 +14,7 @@ import (
 	"a.com/go-server/common/logger"
 	"a.com/go-server/common/mongo"
 	"a.com/go-server/common/redis"
+	"a.com/go-server/common/tracing"
 )
 
 type Configor struct {
@@ -34,6 +36,12 @@ func init() {
 		panic(err)
 	}
 
+	Log = logger.InitLogger(Conf.Logger)
+
+	if _, err := tracing.InitTracing(Conf.Server.Name); err != nil {
+		panic(err)
+	}
+
 	if err := mongo.Init(Conf.Mongo); err != nil {
 		panic(err)
 	}
@@ -44,8 +52,6 @@ func init() {
 	if LocIP, err = locip.GetLocalIP(); err != nil {
 		panic(err)
 	}
-
-	Log = logger.InitLogger(Conf.Logger)
 }
 
 func main() {
@@ -54,7 +60,9 @@ func main() {
 		fmt.Println("failed to listen:", err)
 		panic(err)
 	}
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(tracing.GrpcServerInterceptor(opentracing.GlobalTracer())),
+	)
 	RegisterHandler(server)
 
 	if err := consul.NewConsulRegister(Conf.Consul).

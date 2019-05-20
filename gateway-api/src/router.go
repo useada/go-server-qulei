@@ -1,11 +1,16 @@
 package main
 
 import (
+	"a.com/go-server/common/tracing"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 )
 
 func Router() *gin.Engine {
 	r := gin.Default()
+	r.Use(gin.Recovery())
+	r.Use(tracing.GinTracingMiddleWare(opentracing.GlobalTracer()))
+
 	r.GET("/ping", func(c *gin.Context) { c.String(200, "pong") })
 
 	board := r.Group("/v1/")

@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -8,9 +9,13 @@ import (
 	"gopkg.in/mgo.v2"
 
 	"a.com/go-server/common/configor"
+	"a.com/go-server/common/tracing"
 )
 
-func Doit(db, collect string, h func(*mgo.Collection) error) error {
+func Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) error {
+	span := tracing.StartDBSpan(c, "mongo", "do")
+	defer span.Finish()
+
 	sess, ok := gMgo[db]
 	if !ok {
 		return errors.New("mongo session is nil")

@@ -26,7 +26,7 @@ func (f *FileHandler) Upload(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	if res, err := gclient.Uploader.Query(&pb.FileQueryArgs{
+	if res, err := gclient.Uploader.Query(ctx.Request.Context(), &pb.FileQueryArgs{
 		Id: args.Sha,
 	}); err == nil {
 		return SuccessResponse(res)
@@ -43,7 +43,7 @@ func (f *FileHandler) Upload(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(INTERNEL_ERR, err.Error())
 	}
 
-	res, err := gclient.Uploader.Upload(&pb.FileUploadArgs{
+	res, err := gclient.Uploader.Upload(ctx.Request.Context(), &pb.FileUploadArgs{
 		Id:   id,
 		Ex:   args.Ex,
 		Type: pb.TYPE(args.Type),

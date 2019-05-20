@@ -12,22 +12,22 @@ type UploaderClient struct {
 
 var Uploader *UploaderClient
 
-func (u *UploaderClient) Upload(args *pb.FileUploadArgs) (*pb.FileInfo, error) {
+func (u *UploaderClient) Upload(c context.Context, args *pb.FileUploadArgs) (*pb.FileInfo, error) {
 	conn, err := GetConn(u.service())
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), u.timeout())
+	ctx, cancel := context.WithTimeout(c, u.timeout())
 	defer cancel()
 	return pb.NewUploaderClient(conn).Upload(ctx, args)
 }
 
-func (u *UploaderClient) Query(args *pb.FileQueryArgs) (*pb.FileInfo, error) {
+func (u *UploaderClient) Query(c context.Context, args *pb.FileQueryArgs) (*pb.FileInfo, error) {
 	conn, err := GetConn(u.service())
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), u.timeout())
+	ctx, cancel := context.WithTimeout(c, u.timeout())
 	defer cancel()
 	return pb.NewUploaderClient(conn).Query(ctx, args)
 }

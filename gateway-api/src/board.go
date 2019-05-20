@@ -32,7 +32,7 @@ func (b *BoardHandler) ListComments(ctx *gin.Context) *JsonResponse {
 		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
-	res, err := gclient.Board.ListComments(&pb.CommListArgs{
+	res, err := gclient.Board.ListComments(ctx.Request.Context(), &pb.CommListArgs{
 		Oid:       args.Oid,
 		Cid:       args.Cid,
 		Uid:       "testuid", // TODO
@@ -53,7 +53,7 @@ func (b *BoardHandler) GetComment(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.GetComment(&pb.CommGetArgs{
+	res, err := gclient.Board.GetComment(ctx.Request.Context(), &pb.CommGetArgs{
 		Id:  args.Id,
 		Oid: args.Oid,
 		Uid: "testuid", // TODO
@@ -77,7 +77,7 @@ func (b *BoardHandler) NewComment(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.NewComment(&pb.CommNewArgs{
+	res, err := gclient.Board.NewComment(ctx.Request.Context(), &pb.CommNewArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Author: &pb.UserBaseInfo{
@@ -104,7 +104,7 @@ func (b *BoardHandler) DelComment(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.DelComment(&pb.CommDelArgs{
+	res, err := gclient.Board.DelComment(ctx.Request.Context(), &pb.CommDelArgs{
 		Id:  args.Id,
 		Oid: args.Oid,
 		Cid: args.Cid,
@@ -125,7 +125,7 @@ func (b *BoardHandler) LikeComment(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.LikeComment(&pb.CommLikeArgs{
+	res, err := gclient.Board.LikeComment(ctx.Request.Context(), &pb.CommLikeArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Uid: "testuid", // TODO
@@ -145,7 +145,7 @@ func (b *BoardHandler) UnLikeComment(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.UnLikeComment(&pb.CommUnLikeArgs{
+	res, err := gclient.Board.UnLikeComment(ctx.Request.Context(), &pb.CommUnLikeArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Uid: "testuid", // TODO
@@ -168,7 +168,7 @@ func (b *BoardHandler) ListLikes(ctx *gin.Context) *JsonResponse {
 		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
-	res, err := gclient.Board.ListLikes(&pb.LikeListArgs{
+	res, err := gclient.Board.ListLikes(ctx.Request.Context(), &pb.LikeListArgs{
 		Oid:       args.Oid,
 		PageToken: args.PageToken,
 	})
@@ -186,7 +186,7 @@ func (b *BoardHandler) NewLike(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.NewLike(&pb.LikeNewArgs{
+	res, err := gclient.Board.NewLike(ctx.Request.Context(), &pb.LikeNewArgs{
 		Author: &pb.UserBaseInfo{
 			Uid: "testuid", // TODO
 		},
@@ -206,7 +206,7 @@ func (b *BoardHandler) DelLike(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.DelLike(&pb.LikeDelArgs{
+	res, err := gclient.Board.DelLike(ctx.Request.Context(), &pb.LikeDelArgs{
 		Uid: "testuid", // TODO
 		Oid: args.Oid,
 	})
@@ -224,7 +224,7 @@ func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JsonResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.MutiGetSummary(&pb.BoardSummaryArgs{
+	res, err := gclient.Board.MutiGetSummary(ctx.Request.Context(), &pb.BoardSummaryArgs{
 		Uid:  "testuid", // TODO
 		Oids: args.Oids,
 	})

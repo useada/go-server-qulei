@@ -13,10 +13,10 @@ level = 0         # INFO
 compress = false
 
 [consul]
-host = "192.168.200.191:8500"
+host = "127.0.0.1:8500"
 
 [redis]
-host = "192.168.200.191:6379"
+host = "127.0.0.1:6379"
 auth = ""
 index = 15 
 max_idle = 10

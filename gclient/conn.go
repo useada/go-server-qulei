@@ -4,10 +4,12 @@ import (
 	"errors"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
 	"a.com/go-server/common/consul"
+	"a.com/go-server/common/tracing"
 )
 
 var GrpcConns map[string]*grpc.ClientConn
@@ -42,6 +44,6 @@ func newConn(host, service string) (*grpc.ClientConn, error) {
 			PermitWithoutStream: true,
 			Time:                500 * time.Millisecond,
 		}),
-		//grpc.WithBlock(),
+		grpc.WithUnaryInterceptor(tracing.GrpcClientInterceptor(opentracing.GlobalTracer())),
 		grpc.WithBalancer(grpc.RoundRobin(r)))
 }

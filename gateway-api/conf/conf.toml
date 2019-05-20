@@ -12,5 +12,5 @@ level = 0         # INFO
 compress = false
 
 [grpc]
-consul = "192.168.200.191:8500"
-services = ["board", "uploader", "esearch"]
+consul = "127.0.0.1:8500"
+services = ["board"]
