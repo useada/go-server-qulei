@@ -14,10 +14,16 @@ import (
 )
 
 type Configor struct {
-	Server  configor.ServerConfigor
-	Logger  configor.LoggerConfigor
-	Consul  configor.ConsulConfigor
+	Server  ServerConfigor
 	Elastic ElasticConfigor
+	Logger  logger.LoggerConfigor
+	Consul  consul.ConsulConfigor
+}
+
+type ServerConfigor struct {
+	Name string
+	Host string
+	Port int
 }
 
 type ElasticConfigor struct {

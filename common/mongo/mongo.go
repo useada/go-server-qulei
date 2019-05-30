@@ -8,9 +8,14 @@ import (
 
 	"gopkg.in/mgo.v2"
 
-	"a.com/go-server/common/configor"
 	"a.com/go-server/common/tracing"
 )
+
+type MongoConfigor struct {
+	Host     string
+	Auth     string
+	Database []string
+}
 
 func Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) error {
 	span := tracing.StartDBSpan(c, "mongo", "do")
@@ -27,7 +32,7 @@ func Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) 
 
 var gMgo map[string]*mgo.Session
 
-func Init(conf configor.MongoConfigor) error {
+func Init(conf MongoConfigor) error {
 	gMgo = make(map[string]*mgo.Session)
 	for _, db := range conf.Database {
 		addr := "mongodb://" + conf.Auth + conf.Host + "/" + db

@@ -10,9 +10,15 @@ import (
 )
 
 type Configor struct {
-	Server configor.ServerConfigor
-	Logger configor.LoggerConfigor
+	Server ServerConfigor
 	Grpc   GrpcClients
+	Logger logger.LoggerConfigor
+}
+
+type ServerConfigor struct {
+	Name string
+	Host string
+	Port int
 }
 
 type GrpcClients struct {

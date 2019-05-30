@@ -8,7 +8,6 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 
-	"a.com/go-server/common/configor"
 	"a.com/go-server/common/tracing"
 )
 
@@ -370,7 +369,14 @@ func Doit(c context.Context, cmd string, h func(redis.Conn) error) error {
 
 var gRedigo *redis.Pool
 
-func Init(conf configor.RedisConfigor) {
+type RedisConfigor struct {
+	Host    string
+	Auth    string
+	Index   int
+	MaxIdle int `toml:"max_idle"`
+}
+
+func Init(conf RedisConfigor) {
 	fmt.Println("初始化Redis连接池")
 	gRedigo = &redis.Pool{
 		Dial: func() (redis.Conn, error) {

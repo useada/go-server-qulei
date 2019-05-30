@@ -5,12 +5,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/consul/api"
-
-	"a.com/go-server/common/configor"
 )
 
+type ConsulConfigor struct {
+	Host string
+}
+
 // NewConsulRegister create a new consul register
-func NewConsulRegister(conf configor.ConsulConfigor) *ConsulRegister {
+func NewConsulRegister(conf ConsulConfigor) *ConsulRegister {
 	return &ConsulRegister{
 		address:  conf.Host,
 		Timeout:  time.Duration(1) * time.Minute,
@@ -32,9 +34,9 @@ func (r *ConsulRegister) Register(name, ip string, port int) error {
 		return err
 	}
 	checker := &api.AgentServiceCheck{
-		Interval: r.Interval.String(),                     // 健康检查间隔
-		GRPC:     fmt.Sprintf("%v:%v/%v", ip, port, name), // grpc支持,健康检查的地址
-		DeregisterCriticalServiceAfter: r.Timeout.String(), // 注销时间，相当于过期时间
+		Interval:                       r.Interval.String(),                     // 健康检查间隔
+		GRPC:                           fmt.Sprintf("%v:%v/%v", ip, port, name), // grpc支持,健康检查的地址
+		DeregisterCriticalServiceAfter: r.Timeout.String(),                      // 注销时间，相当于过期时间
 	}
 	return client.Agent().ServiceRegister(&api.AgentServiceRegistration{
 		ID:      fmt.Sprintf("%v-%v-%v", name, ip, port), // 服务节点的名称

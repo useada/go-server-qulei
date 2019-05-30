@@ -7,8 +7,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-
-	"a.com/go-server/common/configor"
 )
 
 var defaultEncoderConfig = zapcore.EncoderConfig{
@@ -26,7 +24,16 @@ var defaultEncoderConfig = zapcore.EncoderConfig{
 	EncodeTime:     MilliSecondTimeEncoder,
 }
 
-func InitLogger(conf configor.LoggerConfigor) *zap.SugaredLogger {
+type LoggerConfigor struct {
+	FilePath   string `toml:"file_path"`
+	MaxSize    int    `toml:"max_size"`
+	MaxBackups int    `toml:"max_backups"`
+	MaxAge     int    `toml:"max_age"`
+	Level      int
+	Compress   bool
+}
+
+func InitLogger(conf LoggerConfigor) *zap.SugaredLogger {
 	return zap.New(newZapCore(conf), zap.AddCaller(), zap.AddCallerSkip(1)).Sugar()
 }
 
@@ -34,7 +41,7 @@ func MilliSecondTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
 }
 
-func newZapCore(conf configor.LoggerConfigor) zapcore.Core {
+func newZapCore(conf LoggerConfigor) zapcore.Core {
 	//日志文件路径配置
 	hook := lumberjack.Logger{
 		Filename:   conf.FilePath,   // 日志文件路径

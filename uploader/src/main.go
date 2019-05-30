@@ -15,11 +15,17 @@ import (
 )
 
 type Configor struct {
-	Server configor.ServerConfigor
-	Logger configor.LoggerConfigor
-	Consul configor.ConsulConfigor
+	Server ServerConfigor
 	S3     S3Configor
-	Mysql  []configor.MysqlConfigor
+	Logger logger.LoggerConfigor
+	Consul consul.ConsulConfigor
+	Mysql  []mysql.MysqlConfigor
+}
+
+type ServerConfigor struct {
+	Name string
+	Host string
+	Port int
 }
 
 type S3Configor struct {

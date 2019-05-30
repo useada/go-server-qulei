@@ -16,11 +16,17 @@ import (
 )
 
 type Configor struct {
-	Server configor.ServerConfigor
-	Logger configor.LoggerConfigor
-	Consul configor.ConsulConfigor
-	Redis  configor.RedisConfigor
-	Mysql  configor.MysqlConfigor
+	Server ServerConfigor
+	Logger logger.LoggerConfigor
+	Consul consul.ConsulConfigor
+	Redis  redis.RedisConfigor
+	Mysql  mysql.MysqlConfigor
+}
+
+type ServerConfigor struct {
+	Name string
+	Host string
+	Port int
 }
 
 var (
