@@ -12,7 +12,7 @@ func Md5(str string) (string, error) {
 	if _, err := m.Write([]byte(str)); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(m.Sum([]byte(""))), nil
+	return hex.EncodeToString(m.Sum(nil)), nil
 }
 
 func Hmac(key, str string) (string, error) {
@@ -20,7 +20,7 @@ func Hmac(key, str string) (string, error) {
 	if _, err := h.Write([]byte(str)); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(h.Sum([]byte(""))), nil
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func Sha1(str string) (string, error) {
@@ -28,5 +28,5 @@ func Sha1(str string) (string, error) {
 	if _, err := sh.Write([]byte(str)); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(sh.Sum([]byte(""))), nil
+	return hex.EncodeToString(sh.Sum(nil)), nil
 }

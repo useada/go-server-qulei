@@ -19,7 +19,7 @@ const (
 	BOARD_PAGE_COUNT = 20
 )
 
-func (b *BoardHandler) ListComments(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) ListComments(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		Cid       string `form:"cid"` // cid != "" 拉取二级评论
@@ -44,9 +44,9 @@ func (b *BoardHandler) ListComments(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) GetComment(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) GetComment(ctx *gin.Context) *JSONResponse {
 	var args struct {
-		Id  string `form:"id" binding:"required"`
+		ID  string `form:"id" binding:"required"`
 		Oid string `form:"oid" binding:"required"`
 	}
 	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
@@ -54,7 +54,7 @@ func (b *BoardHandler) GetComment(ctx *gin.Context) *JsonResponse {
 	}
 
 	res, err := gclient.Board.GetComment(ctx.Request.Context(), &pb.CommGetArgs{
-		Id:  args.Id,
+		Id:  args.ID,
 		Oid: args.Oid,
 		Uid: "testuid", // TODO
 	})
@@ -64,13 +64,13 @@ func (b *BoardHandler) GetComment(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) NewComment(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) NewComment(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid      string `json:"oid" binding:"required"`
 		Cid      string `json:"cid"`
 		IsRepost bool   `json:"is_repost"`
 		Content  string `json:"content" binding:"lte=2000"`
-		ImgId    string `json:"img_id"`
+		ImgID    string `json:"img_id"`
 		ImgEx    string `json:"img_ex"`
 	}
 	if err := ctx.ShouldBindWith(&args, binding.JSON); err != nil {
@@ -84,7 +84,7 @@ func (b *BoardHandler) NewComment(ctx *gin.Context) *JsonResponse {
 			Uid: "testuid", // TODO
 		},
 		IsRepost: args.IsRepost,
-		ImgId:    args.ImgId,
+		ImgId:    args.ImgID,
 		ImgEx:    args.ImgEx,
 		Content:  args.Content,
 	})
@@ -94,9 +94,9 @@ func (b *BoardHandler) NewComment(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) DelComment(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) DelComment(ctx *gin.Context) *JSONResponse {
 	var args struct {
-		Id  string `json:"id" binding:"required"`
+		ID  string `json:"id" binding:"required"`
 		Oid string `json:"oid" binding:"required"`
 		Cid string `json:"cid"`
 	}
@@ -105,7 +105,7 @@ func (b *BoardHandler) DelComment(ctx *gin.Context) *JsonResponse {
 	}
 
 	res, err := gclient.Board.DelComment(ctx.Request.Context(), &pb.CommDelArgs{
-		Id:  args.Id,
+		Id:  args.ID,
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Uid: "testuid", // TODO
@@ -116,7 +116,7 @@ func (b *BoardHandler) DelComment(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) LikeComment(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) LikeComment(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 		Cid string `json:"cid" binding:"required"`
@@ -136,7 +136,7 @@ func (b *BoardHandler) LikeComment(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) UnLikeComment(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) UnLikeComment(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 		Cid string `json:"cid" binding:"required"`
@@ -156,7 +156,7 @@ func (b *BoardHandler) UnLikeComment(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) ListLikes(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) ListLikes(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		PageToken string `form:"page_token"`
@@ -178,7 +178,7 @@ func (b *BoardHandler) ListLikes(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) NewLike(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) NewLike(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 	}
@@ -198,7 +198,7 @@ func (b *BoardHandler) NewLike(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) DelLike(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) DelLike(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 	}
@@ -216,7 +216,7 @@ func (b *BoardHandler) DelLike(ctx *gin.Context) *JsonResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JsonResponse {
+func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oids []string `json:"oids" binding:"required"`
 	}

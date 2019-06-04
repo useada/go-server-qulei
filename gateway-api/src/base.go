@@ -6,24 +6,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type JsonResponse struct {
+// JSONResponse response info struct
+type JSONResponse struct {
 	Code string      `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
-type ApiHandler func(ctx *gin.Context) *JsonResponse
+// APIHandler api function handler
+type APIHandler func(ctx *gin.Context) *JSONResponse
 
-func ResponseWrapper(handle ApiHandler) gin.HandlerFunc {
+// ResponseWrapper response wrapper
+func ResponseWrapper(handle APIHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, handle(ctx))
 	}
 }
 
-func ErrorResponse(code, msg string) *JsonResponse {
-	return &JsonResponse{Code: code, Msg: msg}
+// ErrorResponse error response
+func ErrorResponse(code, msg string) *JSONResponse {
+	return &JSONResponse{Code: code, Msg: msg}
 }
 
-func SuccessResponse(data interface{}) *JsonResponse {
-	return &JsonResponse{Code: "2000", Msg: "OK", Data: data}
+// SuccessResponse success response
+func SuccessResponse(data interface{}) *JSONResponse {
+	return &JSONResponse{Code: "2000", Msg: "OK", Data: data}
 }

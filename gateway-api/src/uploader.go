@@ -16,7 +16,7 @@ type FileHandler struct {
 
 var File *FileHandler
 
-func (f *FileHandler) Upload(ctx *gin.Context) *JsonResponse {
+func (f *FileHandler) Upload(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Sha  string `form:"sha" binding:"required"`
 		Ex   string `form:"ex" binding:"required"`

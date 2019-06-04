@@ -18,11 +18,17 @@ import (
 )
 
 type Configor struct {
-	Server configor.ServerConfigor
-	Logger configor.LoggerConfigor
-	Consul configor.ConsulConfigor
-	Redis  configor.RedisConfigor
-	Mongo  configor.MongoConfigor
+	Server ServerConfigor
+	Logger logger.LoggerConfigor
+	Consul consul.ConsulConfigor
+	Redis  redis.RedisConfigor
+	Mongo  mongo.MongoConfigor
+}
+
+type ServerConfigor struct {
+	Name string
+	Host string
+	Port int
 }
 
 var (
