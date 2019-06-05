@@ -9,8 +9,8 @@ func main() {
   .
   .
   .
-	if err := consul.NewConsulRegister(Conf.Consul).
-		Register(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
+	if err := consul.NewRegister(Conf.Consul).
+		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
     consul.RegisterGrpcHealth(svr)
