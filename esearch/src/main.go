@@ -13,26 +13,26 @@ import (
 	"a.com/go-server/common/logger"
 )
 
-type Configor struct {
-	Server  ServerConfigor
-	Elastic ElasticConfigor
-	Logger  logger.LoggerConfigor
-	Consul  consul.ConsulConfigor
+type Config struct {
+	Server  ServerConfig
+	Elastic ElasticConfig
+	Logger  logger.Config
+	Consul  consul.Config
 }
 
-type ServerConfigor struct {
+type ServerConfig struct {
 	Name string
 	Host string
 	Port int
 }
 
-type ElasticConfigor struct {
+type ElasticConfig struct {
 	Hosts []string
 	Auth  string
 }
 
 var (
-	Conf  Configor
+	Conf  Config
 	Log   *zap.SugaredLogger
 	LocIP string
 )
@@ -63,8 +63,8 @@ func main() {
 	server := grpc.NewServer()
 	RegisterHandler(server)
 
-	if err := consul.NewConsulRegister(Conf.Consul).
-		Register(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
+	if err := consul.NewRegister(Conf.Consul).
+		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
 	consul.RegisterGrpcHealth(server)

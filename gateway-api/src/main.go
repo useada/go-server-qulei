@@ -9,13 +9,13 @@ import (
 	"a.com/go-server/gclient"
 )
 
-type Configor struct {
-	Server ServerConfigor
+type Config struct {
+	Server ServerConfig
 	Grpc   GrpcClients
-	Logger logger.LoggerConfigor
+	Logger logger.Config
 }
 
-type ServerConfigor struct {
+type ServerConfig struct {
 	Name string
 	Host string
 	Port int
@@ -27,7 +27,7 @@ type GrpcClients struct {
 }
 
 var (
-	Conf Configor
+	Conf Config
 	Log  *zap.SugaredLogger
 )
 

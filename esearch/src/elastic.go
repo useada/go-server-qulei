@@ -12,7 +12,7 @@ type EsHandle struct {
 
 var ES = &EsHandle{}
 
-func InitElasticClient(conf ElasticConfigor) error {
+func InitElasticClient(conf ElasticConfig) error {
 	var err error
 	ES.Client, err = elastic.NewClient(elastic.SetURL(conf.Hosts...))
 	return err

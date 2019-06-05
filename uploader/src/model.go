@@ -3,7 +3,7 @@ package main
 import "a.com/go-server/proto/pb"
 
 type FileInfoModel struct {
-	Id     string `json:"id"`    // 文件id <primary key>
+	ID     string `json:"id"`    // 文件id <primary key>
 	Ex     string `json:"ex"`    // 文件扩展名
 	Type   int    `json:"xtype"` // 文件类型 头像/图片/普通文件
 	Width  int    `json:"width"`
@@ -13,7 +13,7 @@ type FileInfoModel struct {
 
 func (f *FileInfoModel) ConstructPb() *pb.FileInfo {
 	return &pb.FileInfo{
-		Id:     f.Id,
+		Id:     f.ID,
 		Ex:     f.Ex,
 		Type:   pb.TYPE(f.Type),
 		Width:  int32(f.Width),
@@ -23,7 +23,7 @@ func (f *FileInfoModel) ConstructPb() *pb.FileInfo {
 }
 
 func (f *FileInfoModel) DestructPb(in *pb.FileUploadArgs) *FileInfoModel {
-	f.Id = in.Id
+	f.ID = in.Id
 	f.Ex = in.Ex
 	f.Type = int(in.Type)
 	f.Height = int(in.Height)

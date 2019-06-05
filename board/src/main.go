@@ -17,22 +17,22 @@ import (
 	"a.com/go-server/common/tracing"
 )
 
-type Configor struct {
-	Server ServerConfigor
-	Logger logger.LoggerConfigor
-	Consul consul.ConsulConfigor
-	Redis  redis.RedisConfigor
-	Mongo  mongo.MongoConfigor
+type Config struct {
+	Server ServerConfig
+	Logger logger.Config
+	Consul consul.Config
+	Redis  redis.Config
+	Mongo  mongo.Config
 }
 
-type ServerConfigor struct {
+type ServerConfig struct {
 	Name string
 	Host string
 	Port int
 }
 
 var (
-	Conf  Configor
+	Conf  Config
 	Log   *zap.SugaredLogger
 	LocIP string
 )
@@ -71,8 +71,8 @@ func main() {
 	)
 	RegisterHandler(server)
 
-	if err := consul.NewConsulRegister(Conf.Consul).
-		Register(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
+	if err := consul.NewRegister(Conf.Consul).
+		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
 	consul.RegisterGrpcHealth(server)

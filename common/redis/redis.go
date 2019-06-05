@@ -11,7 +11,9 @@ import (
 	"a.com/go-server/common/tracing"
 )
 
-// --Bytes Int String
+// -- Bytes Int String
+
+// GetInt ...
 func GetInt(c context.Context, key string) (int, error) {
 	return redis.Int(Get(c, key))
 }
@@ -80,7 +82,7 @@ func MGet(c context.Context, keys []string) (res interface{}, err error) {
 	return res, Doit(c, "mget", handle)
 }
 
-// args:  [key1, val1, key2, val2, ...]
+// MSet args:  [key1, val1, key2, val2, ...]
 func MSet(c context.Context, args []interface{}) (err error) {
 	handle := func(conn redis.Conn) error {
 		_, err = conn.Do("MSET", args...)
@@ -90,6 +92,8 @@ func MSet(c context.Context, args []interface{}) (err error) {
 }
 
 // -- Hash
+
+// HGetInt64 ...
 func HGetInt64(c context.Context, hkey string, key string) (int64, error) {
 	return redis.Int64(HGet(c, hkey, key))
 }
@@ -162,7 +166,7 @@ func HMGet(c context.Context, hkey string, keys []string) (res interface{}, err 
 	return res, Doit(c, "hmget", handle)
 }
 
-// vals:  [key1, val1, key2, val2, ...]
+// HMSet vals:  [key1, val1, key2, val2, ...]
 func HMSet(c context.Context, hkey string, vals []interface{}) (err error) {
 	handle := func(conn redis.Conn) error {
 		args := []interface{}{hkey}
@@ -173,7 +177,7 @@ func HMSet(c context.Context, hkey string, vals []interface{}) (err error) {
 	return Doit(c, "hmset", handle)
 }
 
-// 效率原因, 不建议使用
+// HGetAll 效率原因, 不建议使用
 func HGetAll(c context.Context, hkey string) (res interface{}, err error) {
 	handle := func(conn redis.Conn) error {
 		res, err = conn.Do("HGETALL", hkey)
@@ -191,6 +195,8 @@ func HExists(c context.Context, hkey, key string) (ret int, err error) {
 }
 
 // --Set
+
+// SAdd ...
 func SAdd(c context.Context, skey, member string) (err error) {
 	handle := func(conn redis.Conn) error {
 		_, err = conn.Do("SADD", skey, member)
@@ -216,6 +222,8 @@ func SRem(c context.Context, skey, member string) (err error) {
 }
 
 // --Sorted Set
+
+// ZAdd ...
 func ZAdd(c context.Context, zkey string, score int64, member string) (err error) {
 	handle := func(conn redis.Conn) error {
 		_, err = conn.Do("ZADD", zkey, score, member)
@@ -224,7 +232,7 @@ func ZAdd(c context.Context, zkey string, score int64, member string) (err error
 	return Doit(c, "zadd", handle)
 }
 
-// vals: [score1, member1, score2, member2, ...]
+// ZMAdd vals: [score1, member1, score2, member2, ...]
 func ZMAdd(c context.Context, zkey string, vals []interface{}) (err error) {
 	handle := func(conn redis.Conn) error {
 		args := []interface{}{zkey}
@@ -300,6 +308,8 @@ func ZCard(c context.Context, zkey string) (val int64, err error) {
 }
 
 // --List
+
+// LPopString ...
 func LPopString(c context.Context, lkey string) (val string, err error) {
 	return redis.String(LPop(c, lkey))
 }
@@ -321,6 +331,8 @@ func RPush(c context.Context, lkey string, val interface{}) (err error) {
 }
 
 // --keys
+
+// Exist ...
 func Exist(c context.Context, key string) (ret int, err error) {
 	handle := func(conn redis.Conn) error {
 		ret, err = redis.Int(conn.Do("EXISTS", key))
@@ -369,14 +381,14 @@ func Doit(c context.Context, cmd string, h func(redis.Conn) error) error {
 
 var gRedigo *redis.Pool
 
-type RedisConfigor struct {
+type Config struct {
 	Host    string
 	Auth    string
 	Index   int
 	MaxIdle int `toml:"max_idle"`
 }
 
-func Init(conf RedisConfigor) {
+func Init(conf Config) {
 	fmt.Println("初始化Redis连接池")
 	gRedigo = &redis.Pool{
 		Dial: func() (redis.Conn, error) {

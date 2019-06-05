@@ -21,11 +21,11 @@ func (c *CacheHandle) InitComms(ctx context.Context, oid, cid string,
 	hashArgs := make([]interface{}, 0)
 	for _, item := range items {
 		if data, err := json.Marshal(item); err == nil {
-			hashArgs = append(hashArgs, item.Id)
+			hashArgs = append(hashArgs, item.ID)
 			hashArgs = append(hashArgs, data)
 		}
 		zsetArgs = append(zsetArgs, item.CreatedAt)
-		zsetArgs = append(zsetArgs, item.Id)
+		zsetArgs = append(zsetArgs, item.ID)
 	}
 	if total { // 全部缓存
 		zsetArgs = append(zsetArgs, 0)
@@ -76,7 +76,7 @@ func (c *CacheHandle) NewSummary(ctx context.Context, pitem *SummaryModel) error
 	if err != nil {
 		return err
 	}
-	return redis.Set(ctx, c.KeySummary(pitem.Id), data, 3600)
+	return redis.Set(ctx, c.KeySummary(pitem.ID), data, 3600)
 }
 
 func (c *CacheHandle) DelSummary(ctx context.Context, oid string) error {
@@ -179,7 +179,7 @@ func (c *CacheHandle) SetHashComm(ctx context.Context, pitem *CommentModel) erro
 	}
 
 	hkey := c.KeyHashComms(pitem.Oid)
-	if err = redis.HSet(ctx, hkey, pitem.Id, val); err == nil {
+	if err = redis.HSet(ctx, hkey, pitem.ID, val); err == nil {
 		redis.Expire(ctx, hkey, TTL_HASH_KEY)
 	}
 	return err
@@ -235,7 +235,7 @@ func (c *CacheHandle) ListZsetComms(ctx context.Context, oid, cid string,
 
 func (c *CacheHandle) PushZsetComm(ctx context.Context, pitem *CommentModel) error {
 	zkey := c.KeyZsetComms(pitem.Oid + pitem.Cid)
-	err := redis.ZAdd(ctx, zkey, pitem.CreatedAt, pitem.Id)
+	err := redis.ZAdd(ctx, zkey, pitem.CreatedAt, pitem.ID)
 	if err != nil {
 		redis.Delete(ctx, zkey)
 	} else {

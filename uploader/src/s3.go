@@ -58,7 +58,7 @@ var ContentTypeMap = map[string]string{
 
 var S3 *S3Client
 
-func InitS3Client(conf S3Configor) {
+func InitS3Client(conf S3Config) {
 	S3 = &S3Client{
 		Bucket: conf.Bucket,
 		ACL:    conf.ACL,

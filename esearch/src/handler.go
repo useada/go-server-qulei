@@ -20,7 +20,7 @@ func (s *SvrHandler) UsersByName(ctx context.Context,
 	in *pb.UsersByNameArgs) (*pb.UserInfos, error) {
 	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
-	ptok := page.PageToken{}
+	ptok := page.Token{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}
@@ -44,7 +44,7 @@ func (s *SvrHandler) UsersByNear(ctx context.Context,
 	in *pb.UsersByNearArgs) (*pb.UserInfos, error) {
 	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
-	ptok := page.PageToken{}
+	ptok := page.Token{}
 	if err := ptok.Decode(in.PageToken); err != nil {
 		return &res, err
 	}

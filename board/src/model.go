@@ -1,24 +1,25 @@
 package main
 
 import (
+	"github.com/rs/xid"
+
 	"a.com/go-server/common/utime"
-	"a.com/go-server/common/xid"
 	"a.com/go-server/proto/pb"
 )
 
 type CommentModel struct {
-	Id  string `json:"id" bson:"_id,omitempty"`
+	ID  string `json:"id" bson:"_id,omitempty"`
 	Oid string `json:"oid" bson:"oid"`
 	Cid string `json:"cid" bson:"cid"`
 
 	Uname    string `json:"uname" bson:"uname"`
-	Uid      string `json:"uid" bson:"uid"`
-	AvatarId string `json:"avatar_id" bson:"avatar_id"`
+	UID      string `json:"uid" bson:"uid"`
+	AvatarID string `json:"avatar_id" bson:"avatar_id"`
 	AvatarEx string `json:"avatar_ex" bson:"avatar_ex"`
 
 	IsRepost bool   `json:"is_repost" bson:"is_repost"`
 	Content  string `json:"content" bson:"content"`
-	ImgId    string `json:"img_id" bson:"img_id"`
+	ImgID    string `json:"img_id" bson:"img_id"`
 	ImgEx    string `json:"img_ex" bson:"img_ex"`
 
 	IsLiking   bool  `json:"is_liking" bson:"is_liking,omitempty"`
@@ -33,19 +34,19 @@ func (c *CommentModel) ConstructPb() *pb.CommentInfo {
 	replys := make([]*pb.CommentInfo, 0)
 	for _, r := range c.Replys {
 		replys = append(replys, &pb.CommentInfo{
-			Id:         r.Id,
+			Id:         r.ID,
 			Oid:        r.Oid,
 			IsRepost:   r.IsRepost,
 			Cid:        r.Cid,
 			Content:    r.Content,
 			ImgId:      r.ImgEx,
-			ImgEx:      r.ImgId,
+			ImgEx:      r.ImgID,
 			LikesCount: int32(r.LikesCount),
 			ReplyCount: int32(r.ReplyCount),
 			Author: &pb.UserBaseInfo{
 				Uname:    r.Uname,
-				Uid:      r.Uid,
-				AvatarId: r.AvatarId,
+				Uid:      r.UID,
+				AvatarId: r.AvatarID,
 				AvatarEx: r.AvatarEx,
 			},
 			IsLiking:  r.IsLiking,
@@ -53,19 +54,19 @@ func (c *CommentModel) ConstructPb() *pb.CommentInfo {
 		})
 	}
 	return &pb.CommentInfo{
-		Id:         c.Id,
+		Id:         c.ID,
 		Oid:        c.Oid,
 		IsRepost:   c.IsRepost,
 		Cid:        c.Cid,
 		Content:    c.Content,
 		ImgId:      c.ImgEx,
-		ImgEx:      c.ImgId,
+		ImgEx:      c.ImgID,
 		LikesCount: int32(c.LikesCount),
 		ReplyCount: int32(c.ReplyCount),
 		Author: &pb.UserBaseInfo{
 			Uname:    c.Uname,
-			Uid:      c.Uid,
-			AvatarId: c.AvatarId,
+			Uid:      c.UID,
+			AvatarId: c.AvatarID,
 			AvatarEx: c.AvatarEx,
 		},
 		IsLiking:  c.IsLiking,
@@ -75,16 +76,16 @@ func (c *CommentModel) ConstructPb() *pb.CommentInfo {
 }
 
 func (c *CommentModel) DestructPb(in *pb.CommNewArgs) *CommentModel {
-	c.Id = xid.New().String()
+	c.ID = xid.New().String()
 	c.Oid = in.Oid
 	c.IsRepost = in.IsRepost
 	c.Cid = in.Cid
 	c.Uname = in.Author.Uname
-	c.Uid = in.Author.Uid
-	c.AvatarId = in.Author.AvatarId
+	c.UID = in.Author.Uid
+	c.AvatarID = in.Author.AvatarId
 	c.AvatarEx = in.Author.AvatarEx
 	c.Content = in.Content
-	c.ImgId = in.ImgId
+	c.ImgID = in.ImgId
 	c.ImgEx = in.ImgEx
 	c.CreatedAt = utime.Millisec()
 	return c
@@ -105,17 +106,17 @@ func (c CommentModels) Swap(i, j int) {
 }
 
 type CommentLikeModel struct {
-	Id        string `json:"id" bson:"_id,omitempty"` // Id = uid + cid
+	ID        string `json:"id" bson:"_id,omitempty"` // Id = uid + cid
 	Oid       string `json:"oid" bson:"oid"`
-	Uid       string `json:"uid" bson:"uid"`
+	UID       string `json:"uid" bson:"uid"`
 	Cid       string `json:"cid" bson:"cid"`
 	CreatedAt int64  `json:"created_at" bson:"created_at"`
 }
 
 func (c *CommentLikeModel) DestructPb(in *pb.CommLikeArgs) *CommentLikeModel {
-	c.Id = in.Uid + in.Cid
+	c.ID = in.Uid + in.Cid
 	c.Oid = in.Oid
-	c.Uid = in.Uid
+	c.UID = in.Uid
 	c.Cid = in.Cid
 	c.CreatedAt = utime.Millisec()
 	return c
@@ -124,12 +125,12 @@ func (c *CommentLikeModel) DestructPb(in *pb.CommLikeArgs) *CommentLikeModel {
 type CommentLikeModels []CommentLikeModel
 
 type LikeModel struct {
-	Id  string `json:"id" bson:"_id,omitempty"` // Id = uid + oid
+	ID  string `json:"id" bson:"_id,omitempty"` // Id = uid + oid
 	Oid string `json:"oid" bson:"oid"`
 
 	Uname    string `json:"uname" bson:"uname"`
-	Uid      string `json:"uid" bson:"uid"`
-	AvatarId string `json:"avatar_id" bson:"avatar_id"`
+	UID      string `json:"uid" bson:"uid"`
+	AvatarID string `json:"avatar_id" bson:"avatar_id"`
 	AvatarEx string `json:"avatar_ex" bson:"avatar_ex"`
 
 	CreatedAt int64 `json:"created_at" bson:"created_at"`
@@ -137,11 +138,11 @@ type LikeModel struct {
 
 func (l *LikeModel) ConstructPb() *pb.LikeInfo {
 	return &pb.LikeInfo{
-		Id: l.Id,
+		Id: l.ID,
 		Author: &pb.UserBaseInfo{
 			Uname:    l.Uname,
-			Uid:      l.Uid,
-			AvatarId: l.AvatarId,
+			Uid:      l.UID,
+			AvatarId: l.AvatarID,
 			AvatarEx: l.AvatarEx,
 		},
 		Oid: l.Oid,
@@ -149,11 +150,11 @@ func (l *LikeModel) ConstructPb() *pb.LikeInfo {
 }
 
 func (l *LikeModel) DestructPb(in *pb.LikeNewArgs) *LikeModel {
-	l.Id = in.Author.Uid + in.Oid
+	l.ID = in.Author.Uid + in.Oid
 	l.Oid = in.Oid
 	l.Uname = in.Author.Uname
-	l.Uid = in.Author.Uid
-	l.AvatarId = in.Author.AvatarId
+	l.UID = in.Author.Uid
+	l.AvatarID = in.Author.AvatarId
 	l.AvatarEx = in.Author.AvatarEx
 	l.CreatedAt = utime.Millisec()
 	return l
@@ -162,7 +163,7 @@ func (l *LikeModel) DestructPb(in *pb.LikeNewArgs) *LikeModel {
 type LikeModels []LikeModel
 
 type SummaryModel struct {
-	Id              string `json:"id" bson:"_id,omitempty"` // Id = oid
+	ID              string `json:"id" bson:"_id,omitempty"` // Id = oid
 	CommsCount      int    `json:"comms_count" bson:"comms_count"`
 	CommsFirstCount int    `json:"comms_first_count" bson:"comms_first_count"`
 	LikesCount      int    `json:"likes_count" bson:"likes_count"`
@@ -172,7 +173,7 @@ type SummaryModel struct {
 
 func (s *SummaryModel) ConstructPb() *pb.BoardSummaryInfo {
 	return &pb.BoardSummaryInfo{
-		Id:              s.Id,
+		Id:              s.ID,
 		CommsCount:      int32(s.CommsCount),
 		CommsFirstCount: int32(s.CommsFirstCount),
 		LikesCount:      int32(s.LikesCount),

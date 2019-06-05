@@ -20,7 +20,7 @@ type SvrHandler struct{}
 
 func (s *SvrHandler) ListComments(ctx context.Context,
 	in *pb.CommListArgs) (*pb.CommentInfos, error) {
-	ptk := page.PageToken{}
+	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
 		return nil, err
@@ -76,7 +76,7 @@ func (s *SvrHandler) NewComment(ctx context.Context,
 	} else {
 		Log.Error("incr summary oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 	}
-	return &pb.ReplyBaseInfo{Id: pitem.Id}, nil
+	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
 func (s *SvrHandler) DelComment(ctx context.Context,
@@ -119,7 +119,7 @@ func (s *SvrHandler) LikeComment(ctx context.Context,
 	} else {
 		Log.Error("incr like comm oid:%s cid:%v err:%v", in.Oid, in.Cid, err)
 	}
-	return &pb.ReplyBaseInfo{Id: pitem.Id}, nil
+	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
 func (s *SvrHandler) UnLikeComment(ctx context.Context,
@@ -141,7 +141,7 @@ func (s *SvrHandler) UnLikeComment(ctx context.Context,
 
 func (s *SvrHandler) ListLikes(ctx context.Context,
 	in *pb.LikeListArgs) (*pb.LikeInfos, error) {
-	ptk := page.PageToken{}
+	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
 		return nil, err
@@ -170,7 +170,7 @@ func (s *SvrHandler) NewLike(ctx context.Context,
 	} else {
 		Log.Error("incr likes oid:%s err:%v", in.Oid, err)
 	}
-	return &pb.ReplyBaseInfo{Id: pitem.Id}, nil
+	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
 func (s *SvrHandler) DelLike(ctx context.Context,
@@ -212,7 +212,7 @@ func (s *SvrHandler) MutiGetSummary(ctx context.Context,
 }
 
 func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
-	ptk page.PageToken) (CommentModels, error) {
+	ptk page.Token) (CommentModels, error) {
 	ids, err := Cache.ListZsetComms(ctx, oid, cid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
 }
 
 func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string,
-	ptk page.PageToken) (CommentModels, error) {
+	ptk page.Token) (CommentModels, error) {
 	count := ptk.Limit
 	if ptk.Offset == ct.TIME_INF_MAX {
 		count = COUNT_COMM_CACHE
@@ -238,7 +238,7 @@ func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string,
 }
 
 func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels,
-	ptk page.PageToken, uid string) (*pb.CommentInfos, error) {
+	ptk page.Token, uid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
 		Items:     make([]*pb.CommentInfo, 0),
 		PageToken: "",
@@ -276,7 +276,7 @@ func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *CommentModel,
 }
 
 func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels,
-	ptk page.PageToken) (*pb.LikeInfos, error) {
+	ptk page.Token) (*pb.LikeInfos, error) {
 	res := &pb.LikeInfos{
 		Items:     make([]*pb.LikeInfo, 0),
 		PageToken: "",
@@ -308,7 +308,7 @@ func (s *SvrHandler) packSummaryInfos(ctx context.Context, items SummaryModels,
 
 	xmap := s.userLikes(ctx, uid)
 	for _, item := range items {
-		if _, ok := xmap[item.Id]; ok {
+		if _, ok := xmap[item.ID]; ok {
 			item.IsLiking = true
 		}
 		res.Items = append(res.Items, item.ConstructPb())
@@ -342,7 +342,7 @@ func (s *SvrHandler) diffCommIds(ctx context.Context, items CommentModels,
 	ids []string) []string {
 	xmap := make(map[string]bool)
 	for _, item := range items {
-		xmap[item.Id] = true
+		xmap[item.ID] = true
 	}
 
 	diffids := make([]string, 0)
@@ -358,7 +358,7 @@ func (s *SvrHandler) diffSumIds(ctx context.Context, items SummaryModels,
 	ids []string) []string {
 	xmap := make(map[string]bool)
 	for _, item := range items {
-		xmap[item.Id] = true
+		xmap[item.ID] = true
 	}
 
 	diffids := make([]string, 0)
@@ -373,13 +373,13 @@ func (s *SvrHandler) diffSumIds(ctx context.Context, items SummaryModels,
 func (s *SvrHandler) cacheSummary(ctx context.Context, items SummaryModels, ids []string) {
 	xmap := make(map[string]SummaryModel)
 	for _, item := range items {
-		xmap[item.Id] = item
+		xmap[item.ID] = item
 	}
 
 	for _, id := range ids {
 		val, ok := xmap[id]
 		if !ok {
-			val = SummaryModel{Id: id}
+			val = SummaryModel{ID: id}
 		}
 		Cache.NewSummary(ctx, &val)
 	}
@@ -402,7 +402,7 @@ func (s *SvrHandler) userCommLikes(ctx context.Context, uid string) map[string]C
 
 	ditems, err := DB.ListUserCommLikes(ctx, uid)
 	if err == nil && len(ditems) == 0 {
-		ditems = append(ditems, CommentLikeModel{Id: "GUARD-ID", Cid: "GUARD-Cid"})
+		ditems = append(ditems, CommentLikeModel{ID: "GUARD-ID", Cid: "GUARD-Cid"})
 	}
 	Cache.NewUserCommLikes(ctx, uid, ditems)
 
@@ -428,7 +428,7 @@ func (s *SvrHandler) userLikes(ctx context.Context, uid string) map[string]LikeM
 
 	ditems, err := DB.ListUserLikes(ctx, uid)
 	if err == nil && len(ditems) == 0 {
-		ditems = append(ditems, LikeModel{Id: "GUARD-ID", Oid: "GUARD-Oid"})
+		ditems = append(ditems, LikeModel{ID: "GUARD-ID", Oid: "GUARD-Oid"})
 	}
 	Cache.NewUserLikes(ctx, uid, ditems)
 

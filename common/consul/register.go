@@ -7,28 +7,28 @@ import (
 	"github.com/hashicorp/consul/api"
 )
 
-type ConsulConfigor struct {
+type Config struct {
 	Host string
 }
 
-// NewConsulRegister create a new consul register
-func NewConsulRegister(conf ConsulConfigor) *ConsulRegister {
-	return &ConsulRegister{
+// NewRegister create a new consul register
+func NewRegister(conf Config) *Register {
+	return &Register{
 		address:  conf.Host,
 		Timeout:  time.Duration(1) * time.Minute,
 		Interval: time.Duration(5) * time.Second,
 	}
 }
 
-// ConsulRegister consul service register
-type ConsulRegister struct {
+// Register  service register
+type Register struct {
 	address  string
 	Timeout  time.Duration
 	Interval time.Duration
 }
 
-// Register register service
-func (r *ConsulRegister) Register(name, ip string, port int) error {
+// Registe service
+func (r *Register) Registe(name, ip string, port int) error {
 	client, err := api.NewClient(&api.Config{Address: r.address})
 	if err != nil {
 		return err

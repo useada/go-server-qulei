@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
-type MysqlNode struct {
+type ConfigNode struct {
 	Host    string
 	Auth    string
 	MaxIdle int `toml:"max_idle"`
 	MaxOpen int `toml:"max_open"`
 }
 
-type MysqlConfigor struct {
+type Config struct {
 	Name   string
 	Option string
-	Master MysqlNode
-	Slave  []MysqlNode
+	Master ConfigNode
+	Slave  []ConfigNode
 }
 
 type dbInstance struct {
@@ -42,7 +41,7 @@ func (i *dbInstance) getSlave() *Client {
 	return i.Slave[next%i.Total]
 }
 
-func connect(dbname string, dboption string, node MysqlNode) (*gorm.DB, error) {
+func connect(dbname string, dboption string, node ConfigNode) (*gorm.DB, error) {
 	dst := fmt.Sprintf("%s@tcp(%s)/%s", node.Auth, node.Host, dbname)
 	if len(dboption) > 0 {
 		dst = dst + "?" + dboption
@@ -62,7 +61,7 @@ func connect(dbname string, dboption string, node MysqlNode) (*gorm.DB, error) {
 
 var gInstance map[string]dbInstance
 
-func Init(confs []MysqlConfigor) error {
+func Init(confs []Config) error {
 	gInstance = make(map[string]dbInstance)
 	for _, conf := range confs {
 		instance := dbInstance{}
@@ -81,7 +80,7 @@ func Init(confs []MysqlConfigor) error {
 				continue
 			}
 			instance.Slave = append(instance.Slave, &Client{DB: orm})
-			instance.Total += 1
+			instance.Total++
 		}
 		gInstance[conf.Name] = instance
 	}

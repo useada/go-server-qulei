@@ -14,28 +14,28 @@ import (
 	"a.com/go-server/common/mysql"
 )
 
-type Configor struct {
-	Server ServerConfigor
-	S3     S3Configor
-	Logger logger.LoggerConfigor
-	Consul consul.ConsulConfigor
-	Mysql  []mysql.MysqlConfigor
+type Config struct {
+	Server ServerConfig
+	S3     S3Config
+	Logger logger.Config
+	Consul consul.Config
+	Mysql  []mysql.Config
 }
 
-type ServerConfigor struct {
+type ServerConfig struct {
 	Name string
 	Host string
 	Port int
 }
 
-type S3Configor struct {
+type S3Config struct {
 	Region string
 	ACL    string
 	Bucket string
 }
 
 var (
-	Conf  Configor
+	Conf  Config
 	Log   *zap.SugaredLogger
 	LocIP string
 )
@@ -68,8 +68,8 @@ func main() {
 	server := grpc.NewServer()
 	RegisterHandler(server)
 
-	if err := consul.NewConsulRegister(Conf.Consul).
-		Register(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
+	if err := consul.NewRegister(Conf.Consul).
+		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
 	consul.RegisterGrpcHealth(server)

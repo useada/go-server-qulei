@@ -24,7 +24,7 @@ var defaultEncoderConfig = zapcore.EncoderConfig{
 	EncodeTime:     MilliSecondTimeEncoder,
 }
 
-type LoggerConfigor struct {
+type Config struct {
 	FilePath   string `toml:"file_path"`
 	MaxSize    int    `toml:"max_size"`
 	MaxBackups int    `toml:"max_backups"`
@@ -33,7 +33,7 @@ type LoggerConfigor struct {
 	Compress   bool
 }
 
-func InitLogger(conf LoggerConfigor) *zap.SugaredLogger {
+func InitLogger(conf Config) *zap.SugaredLogger {
 	return zap.New(newZapCore(conf), zap.AddCaller(), zap.AddCallerSkip(1)).Sugar()
 }
 
@@ -41,7 +41,7 @@ func MilliSecondTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
 }
 
-func newZapCore(conf LoggerConfigor) zapcore.Core {
+func newZapCore(conf Config) zapcore.Core {
 	//日志文件路径配置
 	hook := lumberjack.Logger{
 		Filename:   conf.FilePath,   // 日志文件路径

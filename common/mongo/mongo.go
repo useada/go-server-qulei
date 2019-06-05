@@ -11,7 +11,7 @@ import (
 	"a.com/go-server/common/tracing"
 )
 
-type MongoConfigor struct {
+type Config struct {
 	Host     string
 	Auth     string
 	Database []string
@@ -32,7 +32,7 @@ func Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) 
 
 var gMgo map[string]*mgo.Session
 
-func Init(conf MongoConfigor) error {
+func Init(conf Config) error {
 	gMgo = make(map[string]*mgo.Session)
 	for _, db := range conf.Database {
 		addr := "mongodb://" + conf.Auth + conf.Host + "/" + db

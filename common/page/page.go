@@ -6,15 +6,15 @@ import (
 	"errors"
 )
 
-// PageToken 分页口令, 包含下一分页的参数
-type PageToken struct {
+// Token 分页口令, 包含下一分页的参数
+type Token struct {
 	Offset int64 `json:"offset"` // created_at / updated_at / price
 	Limit  int   `json:"limit"`  //
 }
 
-// 默认PageToken
+// Default Token
 func Default(offset int64, limit int) (string, error) {
-	bytes, err := json.Marshal(PageToken{
+	bytes, err := json.Marshal(Token{
 		Offset: offset,
 		Limit:  limit,
 	})
@@ -25,8 +25,8 @@ func Default(offset int64, limit int) (string, error) {
 }
 
 // Encode 返回一个 base64 字符串
-func (p *PageToken) Encode() (string, error) {
-	bytes, err := json.Marshal(*p)
+func (t *Token) Encode() (string, error) {
+	bytes, err := json.Marshal(*t)
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +34,7 @@ func (p *PageToken) Encode() (string, error) {
 }
 
 // Decode ...
-func (p *PageToken) Decode(tok string) error {
+func (t *Token) Decode(tok string) error {
 	if len(tok) == 0 {
 		return errors.New("empty page token")
 	}
@@ -43,5 +43,5 @@ func (p *PageToken) Decode(tok string) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(bytes, p)
+	return json.Unmarshal(bytes, t)
 }

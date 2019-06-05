@@ -9,35 +9,35 @@ import (
 	"google.golang.org/grpc/naming"
 )
 
-func NewConsulResolver(address string, service string) naming.Resolver {
-	return &consulResolver{address: address, service: service}
+func NewResolver(address string, service string) naming.Resolver {
+	return &resolver{address: address, service: service}
 }
 
-type consulResolver struct {
+type resolver struct {
 	address string
 	service string
 }
 
-func (r *consulResolver) Resolve(target string) (naming.Watcher, error) {
+func (r *resolver) Resolve(target string) (naming.Watcher, error) {
 	client, err := api.NewClient(&api.Config{Address: r.address})
 	if err != nil {
 		return nil, err
 	}
-	return &consulWatcher{
+	return &watcher{
 		client:  client,
 		service: r.service,
 		addrs:   map[string]struct{}{},
 	}, nil
 }
 
-type consulWatcher struct {
+type watcher struct {
 	client    *api.Client
 	service   string
 	addrs     map[string]struct{}
 	lastIndex uint64
 }
 
-func (w *consulWatcher) Next() ([]*naming.Update, error) {
+func (w *watcher) Next() ([]*naming.Update, error) {
 	for {
 		services, metainfo, err := w.client.Health().Service(w.service, "", true, &api.QueryOptions{
 			AllowStale: true,
@@ -73,5 +73,5 @@ func (w *consulWatcher) Next() ([]*naming.Update, error) {
 	}
 }
 
-func (w *consulWatcher) Close() {
+func (w *watcher) Close() {
 }
