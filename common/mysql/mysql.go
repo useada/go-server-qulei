@@ -1,9 +1,13 @@
 package mysql
 
 import (
+	"context"
 	"errors"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	"a.com/go-server/common/tracing"
 )
 
 func Master(dbname string) *Client {
@@ -26,9 +30,13 @@ type Client struct {
 	*gorm.DB
 }
 
-func (c *Client) Doit(h func(*gorm.DB) error) error {
+func (c *Client) Doit(ctx context.Context, h func(*gorm.DB) error) error {
 	if c == nil {
 		return errors.New("mysql instance is nil")
 	}
+
+	span := tracing.StartDBSpan(ctx, "mongo", "do")
+	defer span.Finish()
+
 	return h(c.DB)
 }

@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type ConfigNode struct {

@@ -32,7 +32,7 @@ func (s *SvrHandler) Upload(ctx context.Context,
 	}
 
 	pitem := &FileInfoModel{}
-	if err := DB.AddFileInfo(pitem.DestructPb(in)); err != nil {
+	if err := DB.AddFileInfo(ctx, pitem.DestructPb(in)); err != nil {
 		fmt.Println("add file info error:", err)
 	}
 	return pitem.ConstructPb(), nil
@@ -41,7 +41,7 @@ func (s *SvrHandler) Upload(ctx context.Context,
 func (s *SvrHandler) Query(ctx context.Context,
 	in *pb.FileQueryArgs) (*pb.FileInfo, error) {
 
-	pitem, err := DB.GetFileInfo(in.Id)
+	pitem, err := DB.GetFileInfo(ctx, in.Id)
 	if err != nil {
 		return nil, err
 	}
