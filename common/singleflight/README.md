@@ -20,3 +20,5 @@ if err != nil {
     fmt.Println("Do error: %v", err)
 }
 ```
+
+https://github.com/golang/groupcache/tree/master/singleflight

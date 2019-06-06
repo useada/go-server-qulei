@@ -35,7 +35,7 @@ func (c *Client) Doit(ctx context.Context, h func(*gorm.DB) error) error {
 		return errors.New("mysql instance is nil")
 	}
 
-	span := tracing.StartDBSpan(ctx, "mongo", "do")
+	span := tracing.StartDBSpan(ctx, "mysql", "do")
 	defer span.Finish()
 
 	return h(c.DB)

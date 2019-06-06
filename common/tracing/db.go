@@ -13,8 +13,6 @@ func StartDBSpan(ctx context.Context, dbtype, cmd string) opentracing.Span {
 		dbtype+" "+cmd,
 	)
 
-	ext.SpanKindRPCClient.Set(span)
 	ext.DBType.Set(span, dbtype)
-	ext.Component.Set(span, "golang/"+dbtype)
 	return span
 }

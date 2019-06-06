@@ -1,45 +1,61 @@
 package main
 
 import (
-	"a.com/go-server/common/tracing"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
+
+	"a.com/go-server/common/profiler"
+	"a.com/go-server/common/request"
+	"a.com/go-server/common/tracing"
 )
 
 func Router() *gin.Engine {
-	r := gin.Default()
-	r.Use(gin.Recovery())
-	r.Use(tracing.GinTracingMiddleWare(opentracing.GlobalTracer()))
+	router := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) { c.String(200, "pong") })
-
-	board := r.Group("/v1/")
-	board.Use()
+	// middleware
 	{
-		board.GET("/board/comm/list", ResponseWrapper(Board.ListComments))
-		board.GET("/board/comm/get", ResponseWrapper(Board.GetComment))
-		board.POST("/board/comm/new", ResponseWrapper(Board.NewComment))
-		board.POST("/board/comm/del", ResponseWrapper(Board.DelComment))
-		board.POST("/board/comm/like", ResponseWrapper(Board.LikeComment))
-		board.POST("/board/comm/unlike", ResponseWrapper(Board.UnLikeComment))
-		board.GET("/board/like/list", ResponseWrapper(Board.ListLikes))
-		board.POST("/board/like/new", ResponseWrapper(Board.NewLike))
-		board.POST("/board/like/del", ResponseWrapper(Board.DelLike))
-		board.POST("/board/summary/mget", ResponseWrapper(Board.MutiGetSummary)) // 应该在feed接口里被调用
+		router.Use(gin.Recovery())
+		router.Use(tracing.Trace(opentracing.GlobalTracer()))
+		router.Use(request.InjectID())
 	}
 
-	search := r.Group("/v1/")
-	search.Use()
+	// health check
 	{
-		search.GET("/search/user/name", ResponseWrapper(Search.UsersByName))
-		search.GET("/search/user/near", ResponseWrapper(Search.UsersByNear))
+		router.GET("/ping", func(c *gin.Context) { c.String(200, "pong") })
 	}
 
-	file := r.Group("/v1/")
-	file.Use()
+	// pprof
 	{
-		file.POST("/file/upload", ResponseWrapper(File.Upload))
+		profiler.Prof(router)
 	}
 
-	return r
+	// 评论点赞
+	board := router.Group("/v1/board/")
+	{
+		board.GET("/comm/list", ResponseWrapper(Board.ListComments))
+		board.GET("/comm/get", ResponseWrapper(Board.GetComment))
+		board.POST("/comm/new", ResponseWrapper(Board.NewComment))
+		board.POST("/comm/del", ResponseWrapper(Board.DelComment))
+		board.POST("/comm/like", ResponseWrapper(Board.LikeComment))
+		board.POST("/comm/unlike", ResponseWrapper(Board.UnLikeComment))
+		board.GET("/like/list", ResponseWrapper(Board.ListLikes))
+		board.POST("/like/new", ResponseWrapper(Board.NewLike))
+		board.POST("/like/del", ResponseWrapper(Board.DelLike))
+		board.POST("/summary/mget", ResponseWrapper(Board.MutiGetSummary)) // 应该在feed接口里被调用
+	}
+
+	// 搜索
+	search := router.Group("/v1/search/")
+	{
+		search.GET("/user/name", ResponseWrapper(Search.UsersByName))
+		search.GET("/user/near", ResponseWrapper(Search.UsersByNear))
+	}
+
+	// 文件上传
+	file := router.Group("/v1/file")
+	{
+		file.POST("/upload", ResponseWrapper(File.Upload))
+	}
+
+	return router
 }

@@ -6,9 +6,9 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 )
 
-func GinTracingMiddleWare(tracer opentracing.Tracer) gin.HandlerFunc {
+// Trace gin middleware
+func Trace(tracer opentracing.Tracer) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Start span.
 		span := tracer.StartSpan("HTTP/" + c.Request.Method)
 		ext.HTTPMethod.Set(span, c.Request.Method)
 
