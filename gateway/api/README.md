@@ -1,1 +1,1 @@
-gateway-api: APP接口服务
+api: APP 内容网关
