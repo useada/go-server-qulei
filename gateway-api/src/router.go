@@ -5,7 +5,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 
 	"a.com/go-server/common/profiler"
-	"a.com/go-server/common/request"
 	"a.com/go-server/common/tracing"
 )
 
@@ -16,7 +15,6 @@ func Router() *gin.Engine {
 	{
 		router.Use(gin.Recovery())
 		router.Use(tracing.Trace(opentracing.GlobalTracer()))
-		router.Use(request.InjectID())
 	}
 
 	// health check

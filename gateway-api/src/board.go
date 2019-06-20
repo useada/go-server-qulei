@@ -32,6 +32,10 @@ func (b *BoardHandler) ListComments(ctx *gin.Context) *JSONResponse {
 		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
+	/* for test
+	fmt.Println(tracing.GetID(ctx.Request.Context()))
+	*/
+
 	res, err := gclient.Board.ListComments(ctx.Request.Context(), &pb.CommListArgs{
 		Oid:       args.Oid,
 		Cid:       args.Cid,
