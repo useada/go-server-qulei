@@ -1,4 +1,4 @@
-package ct
+package constant
 
 const (
 	TIME_INF_MIN = 0

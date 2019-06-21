@@ -1,4 +1,4 @@
-package st
+package model
 
 type BaseIterface interface {
 	GetId() string
