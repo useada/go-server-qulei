@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"google.golang.org/grpc"
 
@@ -16,6 +18,9 @@ type SvrHandler struct{}
 
 func (s *SvrHandler) Login(ctx context.Context,
 	in *pb.AuthLoginArgs) (*pb.AuthTokenInfo, error) {
+	uid, err := checkLogin(ctx, in)
+	fmt.Println(uid, err)
+
 	return nil, nil
 }
 
@@ -39,7 +44,43 @@ func (s *SvrHandler) UnBind(ctx context.Context,
 	return nil, nil
 }
 
-func (s *SvrHandler) Get(ctx context.Context,
-	in *pb.AuthGetArgs) (*pb.AuthUserInfo, error) {
+func (s *SvrHandler) Detail(ctx context.Context,
+	in *pb.AuthDetailArgs) (*pb.AuthUserInfo, error) {
 	return nil, nil
+}
+
+func (s *SvrHandler) checkLogin(ctx context.Context,
+	in *pb.AuthLoginArgs) (string, error) {
+	switch in.Method {
+	case pb.AuthMethod_PASSWD:
+		data, err := getDetail(map[string]{}{
+			"uname": in.Openid,
+		})
+		return checkPasswd(ctx, in.Openid, in.Code)
+	case pb.AuthMethod_SMS:
+		return checkSmsCode(ctx, in.Openid, in.Code)
+	case pb.AuthMethod_WECHAT:
+		return checkWechat(in.Openid, in.Code)
+	case pb.AuthMethod_QICQ:
+		return checkQicq(in.Openid, in.Code)
+	}
+	return "", errors.New("login method don't support")
+}
+
+func (s *SvrHandler) checkPasswd(ctx context.Context,
+	openid, code string) (string, error) {
+	return "", nil
+}
+
+func (s *SvrHandler) checkSmsCode(ctx context.Context,
+	openid, code string) (string, error) {
+	return "", nil
+}
+
+func (s *SvrHandler) checkWechat(openid, code string) (string, error) {
+	return "", nil
+}
+
+func (s *SvrHandler) checkQicq(openid, code string) (string, error) {
+	return "", nil
 }

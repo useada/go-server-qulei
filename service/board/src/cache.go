@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"a.com/go-server/common/redis"
-	"a.com/go-server/proto/ct"
+	"a.com/go-server/proto/constant"
 )
 
 type CacheHandle struct {
@@ -215,7 +216,7 @@ func (c *CacheHandle) ListZsetComms(ctx context.Context, oid, cid string,
 		return nil, errors.New("zset key ttl failed")
 	}
 
-	ids, err := redis.ZRevRangeByScore(ctx, zkey, stamp-1, ct.TIME_INF_MIN, limit)
+	ids, err := redis.ZRevRangeByScore(ctx, zkey, stamp-1, constant.TIME_INF_MIN, limit)
 	if err != nil {
 		return nil, err
 	}

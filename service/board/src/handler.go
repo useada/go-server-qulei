@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"errors"
 	"sort"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
 	"a.com/go-server/common/page"
-	"a.com/go-server/proto/ct"
+	"a.com/go-server/proto/constant"
 	"a.com/go-server/proto/pb"
 )
 
@@ -23,7 +23,7 @@ func (s *SvrHandler) ListComments(ctx context.Context,
 	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
-		return nil, err
+		return nil, errors.Wrap(err, "decode page token")
 	}
 
 	items, err := s.listCacheComms(ctx, in.Oid, in.Cid, ptk)
@@ -60,7 +60,7 @@ func (s *SvrHandler) NewComment(ctx context.Context,
 		Cache.PushComment(ctx, pitem)
 	} else {
 		Log.Error("new comm oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
-		return nil, err
+		return nil, errors.Wrap(err, "new comment")
 	}
 
 	if len(in.Cid) != 0 { // 二级评论，更新一级评论数据
@@ -85,7 +85,7 @@ func (s *SvrHandler) DelComment(ctx context.Context,
 		Cache.PopComment(ctx, in.Oid, in.Cid, in.Id)
 	} else {
 		Log.Error("del comm oid:%s id:%s err:%v", in.Oid, in.Id, err)
-		return nil, err
+		return nil, errors.Wrap(err, "del comment")
 	}
 
 	if len(in.Cid) != 0 { // 二级评论，更新一级评论数据
@@ -111,7 +111,7 @@ func (s *SvrHandler) LikeComment(ctx context.Context,
 		Cache.DelUserCommLikes(ctx, in.Uid)
 	} else {
 		Log.Error("like comm oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
-		return nil, err
+		return nil, errors.Wrap(err, "like comment")
 	}
 
 	if err := DB.IncrCommLike(ctx, in.Cid); err == nil {
@@ -128,7 +128,7 @@ func (s *SvrHandler) UnLikeComment(ctx context.Context,
 		Cache.DelUserCommLikes(ctx, in.Uid)
 	} else {
 		Log.Error("unlike comm oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
-		return nil, err
+		return nil, errors.Wrap(err, "unlike comment")
 	}
 
 	if err := DB.DecrCommLike(ctx, in.Cid); err == nil {
@@ -144,13 +144,13 @@ func (s *SvrHandler) ListLikes(ctx context.Context,
 	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
-		return nil, err
+		return nil, errors.Wrap(err, "decode page token")
 	}
 
 	items, err := DB.ListLikes(ctx, in.Oid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
 		Log.Error("list likes oid:%s offset:%d err:%v", in.Oid, ptk.Offset, err)
-		return nil, err
+		return nil, errors.Wrap(err, "list db likes")
 	}
 	return s.packLikeInfos(ctx, items, ptk)
 }
@@ -162,7 +162,7 @@ func (s *SvrHandler) NewLike(ctx context.Context,
 		Cache.DelUserLikes(ctx, in.Author.Uid)
 	} else {
 		Log.Error("new like oid:%s uid:%s err:%v", in.Oid, in.Author.Uid, err)
-		return nil, err
+		return nil, errors.Wrap(err, "new like")
 	}
 
 	if err := DB.IncrSummaryLike(ctx, in.Oid); err == nil {
@@ -179,7 +179,7 @@ func (s *SvrHandler) DelLike(ctx context.Context,
 		Cache.DelUserLikes(ctx, in.Uid)
 	} else {
 		Log.Error("del like oid:%s uid:%s err:%v", in.Oid, in.Uid, err)
-		return nil, err
+		return nil, errors.Wrap(err, "del like")
 	}
 
 	if err := DB.DecrSummaryLike(ctx, in.Oid); err == nil {
@@ -215,7 +215,7 @@ func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
 	ptk page.Token) (CommentModels, error) {
 	ids, err := Cache.ListZsetComms(ctx, oid, cid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "list cache comments")
 	}
 	return s.mutiGetComms(ctx, oid, ids)
 }
@@ -223,12 +223,12 @@ func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
 func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string,
 	ptk page.Token) (CommentModels, error) {
 	count := ptk.Limit
-	if ptk.Offset == ct.TIME_INF_MAX {
+	if ptk.Offset == constant.TIME_INF_MAX {
 		count = COUNT_COMM_CACHE
 	}
 	items, err := DB.ListComments(ctx, oid, cid, ptk.Offset, count+1)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "list db comments")
 	}
 
 	if count == COUNT_COMM_CACHE && len(items) > 0 {
@@ -248,7 +248,7 @@ func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels,
 		ptk.Offset = items[ptk.Limit-1].CreatedAt
 		pagetoken, err := ptk.Encode()
 		if err != nil {
-			return res, err
+			return res, errors.Wrap(err, "encode page token")
 		}
 		res.PageToken = pagetoken
 	}
@@ -286,7 +286,7 @@ func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels,
 		ptk.Offset = items[ptk.Limit-1].CreatedAt
 		pagetoken, err := ptk.Encode()
 		if err != nil {
-			return res, err
+			return res, errors.Wrap(err, "encode page token")
 		}
 		res.PageToken = pagetoken
 	}
@@ -330,7 +330,7 @@ func (s *SvrHandler) mutiGetComms(ctx context.Context, oid string,
 
 	ditems, err := DB.MutiGetComments(ctx, cids)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "multi get comments")
 	}
 	for _, item := range ditems {
 		Cache.SetHashComm(ctx, &item)

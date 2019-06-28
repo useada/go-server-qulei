@@ -1,21 +1,21 @@
 package model
 
 type BaseIterface interface {
-	GetId() string
+	GetID() string
 	GetState() int
 	GetCreatedAt() int64
 	GetUpdatedAt() int64
 }
 
 type Base struct {
-	Id        string `json: "id"`
+	ID        string `json: "id"`
 	State     int    `json: "state"`
 	CreatedAt int64  `json: "created_at"`
 	UpdatedAt int64  `json: "updated_at"`
 }
 
-func (b *Base) GetId() string {
-	return b.Id
+func (b *Base) GetID() string {
+	return b.ID
 }
 
 func (b *Base) GetState() int {

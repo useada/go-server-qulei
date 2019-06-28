@@ -9,7 +9,7 @@ service Uauth {
 
     rpc Bind(AuthBindArgs) returns (AuthUserInfo) {}         // 绑定认证信息
     rpc UnBind(AuthUnBindArgs) returns (AuthUserInfo) {}     // 解除绑定认证信息
-    rpc Get(AuthGetArgs) returns (AuthUserInfo) {}           // 获取用户认证相关信息
+    rpc Detail(AuthDetailArgs) returns (AuthUserInfo) {}     // 获取用户认证相关信息
 }
 
 // 认证方式 密码/短信/微信/QQ
@@ -51,7 +51,7 @@ message AuthUnBindArgs {
     string     id     = 2; // uid
 }
 
-message AuthGetArgs {
+message AuthDetailArgs {
     string id = 1; // uid
 }
 
