@@ -12,14 +12,21 @@ import (
 	"a.com/go-server/proto/pb"
 )
 
+const (
+	PAGE_COUNT = 20
+)
+
 func RegisterHandler(svr *grpc.Server) {
 	pb.RegisterBoardServer(svr, &SvrHandler{})
 }
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) ListComments(ctx context.Context,
-	in *pb.CommListArgs) (*pb.CommentInfos, error) {
+func (s *SvrHandler) ListComments(ctx context.Context, in *pb.CommListArgs) (*pb.CommentInfos, error) {
+	if len(in.PageToken) == 0 {
+		in.PageToken = page.Default(constant.TIME_INF_MAX, PAGE_COUNT)
+	}
+
 	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
@@ -40,8 +47,7 @@ func (s *SvrHandler) ListComments(ctx context.Context,
 	return s.packCommentInfos(ctx, items, ptk, in.Uid)
 }
 
-func (s *SvrHandler) GetComment(ctx context.Context,
-	in *pb.CommGetArgs) (*pb.CommentInfo, error) {
+func (s *SvrHandler) GetComment(ctx context.Context, in *pb.CommGetArgs) (*pb.CommentInfo, error) {
 	pitem, err := Cache.GetHashComm(ctx, in.Oid, in.Id)
 	if err == nil {
 		return s.packCommentInfo(ctx, pitem, in.Uid)
@@ -53,8 +59,7 @@ func (s *SvrHandler) GetComment(ctx context.Context,
 	return s.packCommentInfo(ctx, pitem, in.Uid)
 }
 
-func (s *SvrHandler) NewComment(ctx context.Context,
-	in *pb.CommNewArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) NewComment(ctx context.Context, in *pb.CommNewArgs) (*pb.ReplyBaseInfo, error) {
 	pitem := &CommentModel{}
 	if err := DB.NewComment(ctx, pitem.DestructPb(in)); err == nil {
 		Cache.PushComment(ctx, pitem)
@@ -79,8 +84,7 @@ func (s *SvrHandler) NewComment(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
-func (s *SvrHandler) DelComment(ctx context.Context,
-	in *pb.CommDelArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) DelComment(ctx context.Context, in *pb.CommDelArgs) (*pb.ReplyBaseInfo, error) {
 	if err := DB.DelComment(ctx, in.Id); err == nil {
 		Cache.PopComment(ctx, in.Oid, in.Cid, in.Id)
 	} else {
@@ -104,8 +108,7 @@ func (s *SvrHandler) DelComment(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: in.Id}, nil
 }
 
-func (s *SvrHandler) LikeComment(ctx context.Context,
-	in *pb.CommLikeArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) LikeComment(ctx context.Context, in *pb.CommLikeArgs) (*pb.ReplyBaseInfo, error) {
 	pitem := &CommentLikeModel{}
 	if err := DB.NewCommLike(ctx, pitem.DestructPb(in)); err == nil {
 		Cache.DelUserCommLikes(ctx, in.Uid)
@@ -122,8 +125,7 @@ func (s *SvrHandler) LikeComment(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
-func (s *SvrHandler) UnLikeComment(ctx context.Context,
-	in *pb.CommUnLikeArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) UnLikeComment(ctx context.Context, in *pb.CommUnLikeArgs) (*pb.ReplyBaseInfo, error) {
 	if err := DB.DelCommLike(ctx, in.Uid+in.Cid); err == nil {
 		Cache.DelUserCommLikes(ctx, in.Uid)
 	} else {
@@ -139,8 +141,11 @@ func (s *SvrHandler) UnLikeComment(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: in.Uid + in.Cid}, nil
 }
 
-func (s *SvrHandler) ListLikes(ctx context.Context,
-	in *pb.LikeListArgs) (*pb.LikeInfos, error) {
+func (s *SvrHandler) ListLikes(ctx context.Context, in *pb.LikeListArgs) (*pb.LikeInfos, error) {
+	if len(in.PageToken) == 0 {
+		in.PageToken = page.Default(constant.TIME_INF_MAX, PAGE_COUNT)
+	}
+
 	ptk := page.Token{}
 	if err := ptk.Decode(in.PageToken); err != nil {
 		Log.Error("decode pagetoken token:%s err:%v", in.PageToken, err)
@@ -155,8 +160,7 @@ func (s *SvrHandler) ListLikes(ctx context.Context,
 	return s.packLikeInfos(ctx, items, ptk)
 }
 
-func (s *SvrHandler) NewLike(ctx context.Context,
-	in *pb.LikeNewArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) NewLike(ctx context.Context, in *pb.LikeNewArgs) (*pb.ReplyBaseInfo, error) {
 	pitem := &LikeModel{}
 	if err := DB.NewLike(ctx, pitem.DestructPb(in)); err == nil {
 		Cache.DelUserLikes(ctx, in.Author.Uid)
@@ -173,8 +177,7 @@ func (s *SvrHandler) NewLike(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: pitem.ID}, nil
 }
 
-func (s *SvrHandler) DelLike(ctx context.Context,
-	in *pb.LikeDelArgs) (*pb.ReplyBaseInfo, error) {
+func (s *SvrHandler) DelLike(ctx context.Context, in *pb.LikeDelArgs) (*pb.ReplyBaseInfo, error) {
 	if err := DB.DelLike(ctx, in.Uid+in.Oid); err == nil {
 		Cache.DelUserLikes(ctx, in.Uid)
 	} else {
@@ -190,8 +193,7 @@ func (s *SvrHandler) DelLike(ctx context.Context,
 	return &pb.ReplyBaseInfo{Id: in.Uid + in.Oid}, nil
 }
 
-func (s *SvrHandler) MutiGetSummary(ctx context.Context,
-	in *pb.BoardSummaryArgs) (*pb.BoardSummaryInfos, error) {
+func (s *SvrHandler) MutiGetSummary(ctx context.Context, in *pb.BoardSummaryArgs) (*pb.BoardSummaryInfos, error) {
 	if len(in.Oids) == 0 {
 		return nil, errors.New("oids empty")
 	}
@@ -211,8 +213,7 @@ func (s *SvrHandler) MutiGetSummary(ctx context.Context,
 	return s.packSummaryInfos(ctx, append(citems, ditems...), in.Uid)
 }
 
-func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
-	ptk page.Token) (CommentModels, error) {
+func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string, ptk page.Token) (CommentModels, error) {
 	ids, err := Cache.ListZsetComms(ctx, oid, cid, ptk.Offset, ptk.Limit+1)
 	if err != nil {
 		return nil, errors.Wrap(err, "list cache comments")
@@ -220,8 +221,7 @@ func (s *SvrHandler) listCacheComms(ctx context.Context, oid, cid string,
 	return s.mutiGetComms(ctx, oid, ids)
 }
 
-func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string,
-	ptk page.Token) (CommentModels, error) {
+func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string, ptk page.Token) (CommentModels, error) {
 	count := ptk.Limit
 	if ptk.Offset == constant.TIME_INF_MAX {
 		count = COUNT_COMM_CACHE
@@ -237,8 +237,7 @@ func (s *SvrHandler) listDBComms(ctx context.Context, oid, cid string,
 	return items, nil
 }
 
-func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels,
-	ptk page.Token, uid string) (*pb.CommentInfos, error) {
+func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels, ptk page.Token, uid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
 		Items:     make([]*pb.CommentInfo, 0),
 		PageToken: "",
@@ -246,11 +245,7 @@ func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels,
 
 	if ptk.Limit+1 <= len(items) {
 		ptk.Offset = items[ptk.Limit-1].CreatedAt
-		pagetoken, err := ptk.Encode()
-		if err != nil {
-			return res, errors.Wrap(err, "encode page token")
-		}
-		res.PageToken = pagetoken
+		res.PageToken = ptk.Encode()
 	}
 
 	xmap := s.userCommLikes(ctx, uid)
@@ -266,8 +261,7 @@ func (s *SvrHandler) packCommentInfos(ctx context.Context, items CommentModels,
 	return res, nil
 }
 
-func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *CommentModel,
-	uid string) (*pb.CommentInfo, error) {
+func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *CommentModel, uid string) (*pb.CommentInfo, error) {
 	xmap := s.userCommLikes(ctx, uid)
 	if _, ok := xmap[pitem.Cid]; ok {
 		pitem.IsLiking = true
@@ -275,8 +269,7 @@ func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *CommentModel,
 	return pitem.ConstructPb(), nil
 }
 
-func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels,
-	ptk page.Token) (*pb.LikeInfos, error) {
+func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels, ptk page.Token) (*pb.LikeInfos, error) {
 	res := &pb.LikeInfos{
 		Items:     make([]*pb.LikeInfo, 0),
 		PageToken: "",
@@ -284,11 +277,7 @@ func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels,
 
 	if ptk.Limit+1 <= len(items) {
 		ptk.Offset = items[ptk.Limit-1].CreatedAt
-		pagetoken, err := ptk.Encode()
-		if err != nil {
-			return res, errors.Wrap(err, "encode page token")
-		}
-		res.PageToken = pagetoken
+		res.PageToken = ptk.Encode()
 	}
 
 	for _, item := range items {
@@ -300,8 +289,7 @@ func (s *SvrHandler) packLikeInfos(ctx context.Context, items LikeModels,
 	return res, nil
 }
 
-func (s *SvrHandler) packSummaryInfos(ctx context.Context, items SummaryModels,
-	uid string) (*pb.BoardSummaryInfos, error) {
+func (s *SvrHandler) packSummaryInfos(ctx context.Context, items SummaryModels, uid string) (*pb.BoardSummaryInfos, error) {
 	res := &pb.BoardSummaryInfos{
 		Items: make([]*pb.BoardSummaryInfo, 0),
 	}
@@ -316,8 +304,7 @@ func (s *SvrHandler) packSummaryInfos(ctx context.Context, items SummaryModels,
 	return res, nil
 }
 
-func (s *SvrHandler) mutiGetComms(ctx context.Context, oid string,
-	ids []string) (CommentModels, error) {
+func (s *SvrHandler) mutiGetComms(ctx context.Context, oid string, ids []string) (CommentModels, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -338,8 +325,7 @@ func (s *SvrHandler) mutiGetComms(ctx context.Context, oid string,
 	return append(citems, ditems...), nil
 }
 
-func (s *SvrHandler) diffCommIds(ctx context.Context, items CommentModels,
-	ids []string) []string {
+func (s *SvrHandler) diffCommIds(ctx context.Context, items CommentModels, ids []string) []string {
 	xmap := make(map[string]bool)
 	for _, item := range items {
 		xmap[item.ID] = true
@@ -354,8 +340,7 @@ func (s *SvrHandler) diffCommIds(ctx context.Context, items CommentModels,
 	return diffids
 }
 
-func (s *SvrHandler) diffSumIds(ctx context.Context, items SummaryModels,
-	ids []string) []string {
+func (s *SvrHandler) diffSumIds(ctx context.Context, items SummaryModels, ids []string) []string {
 	xmap := make(map[string]bool)
 	for _, item := range items {
 		xmap[item.ID] = true

@@ -9,13 +9,12 @@ import (
 	"google.golang.org/grpc/naming"
 )
 
-func NewResolver(address string, service string) naming.Resolver {
-	return &resolver{address: address, service: service}
+func NewResolver(addr string) (naming.Resolver, error) {
+	return &resolver{address: addr}, nil
 }
 
 type resolver struct {
 	address string
-	service string
 }
 
 func (r *resolver) Resolve(target string) (naming.Watcher, error) {
@@ -23,23 +22,24 @@ func (r *resolver) Resolve(target string) (naming.Watcher, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &watcher{
-		client:  client,
-		service: r.service,
-		addrs:   map[string]struct{}{},
+		client: client,
+		target: target,
+		addrs:  map[string]struct{}{},
 	}, nil
 }
 
 type watcher struct {
 	client    *api.Client
-	service   string
+	target    string
 	addrs     map[string]struct{}
 	lastIndex uint64
 }
 
 func (w *watcher) Next() ([]*naming.Update, error) {
 	for {
-		services, metainfo, err := w.client.Health().Service(w.service, "", true, &api.QueryOptions{
+		services, metainfo, err := w.client.Health().Service(w.target, "", true, &api.QueryOptions{
 			AllowStale: true,
 			WaitIndex:  w.lastIndex, // 同步点，这个调用将一直阻塞，直到有新的更新
 		})

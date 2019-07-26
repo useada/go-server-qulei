@@ -18,8 +18,7 @@ func InitElasticClient(conf ElasticConfig) error {
 	return err
 }
 
-func (es *EsHandle) UsersByName(name string,
-	offset, limit int) ([]SearchModel, error) {
+func (es *EsHandle) UsersByName(name string, offset, limit int) ([]SearchModel, error) {
 	items := make([]SearchModel, 0)
 	if offset+limit > 10000 {
 		return items, nil
@@ -42,8 +41,7 @@ func (es *EsHandle) UsersByName(name string,
 	return items, err
 }
 
-func (es *EsHandle) UsersByNear(lat, lon float64,
-	gender, offset, limit int) ([]SearchModel, error) {
+func (es *EsHandle) UsersByNear(lat, lon float64, gender, offset, limit int) ([]SearchModel, error) {
 	items := make([]SearchModel, 0)
 	if offset+limit > 10000 {
 		return items, nil

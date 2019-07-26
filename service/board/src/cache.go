@@ -16,8 +16,7 @@ type CacheHandle struct {
 
 var Cache = &CacheHandle{}
 
-func (c *CacheHandle) InitComms(ctx context.Context, oid, cid string,
-	items CommentModels, total bool) error {
+func (c *CacheHandle) InitComms(ctx context.Context, oid, cid string, items CommentModels, total bool) error {
 	zsetArgs := make([]interface{}, 0)
 	hashArgs := make([]interface{}, 0)
 	for _, item := range items {
@@ -93,8 +92,7 @@ func (c *CacheHandle) ListUserCommLikes(ctx context.Context, uid string) (Commen
 	return items, json.Unmarshal(data, &items)
 }
 
-func (c *CacheHandle) NewUserCommLikes(ctx context.Context, uid string,
-	items CommentLikeModels) error {
+func (c *CacheHandle) NewUserCommLikes(ctx context.Context, uid string, items CommentLikeModels) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -155,8 +153,7 @@ func (c *CacheHandle) GetHashComm(ctx context.Context, oid, id string) (*Comment
 	return pitem, json.Unmarshal(val, pitem)
 }
 
-func (c *CacheHandle) MutiGetHashComms(ctx context.Context, oid string,
-	ids []string) (CommentModels, error) {
+func (c *CacheHandle) MutiGetHashComms(ctx context.Context, oid string, ids []string) (CommentModels, error) {
 	vals, err := redis.HMGetBytes(ctx, c.KeyHashComms(oid), ids)
 	if err != nil {
 		return nil, err
@@ -195,8 +192,7 @@ func (c *CacheHandle) DelHashComm(ctx context.Context, oid, id string) error {
 
 // -- ZSET
 
-func (c *CacheHandle) InitZsetComms(ctx context.Context, oid, cid string,
-	stamp int64, vals []interface{}) error {
+func (c *CacheHandle) InitZsetComms(ctx context.Context, oid, cid string, stamp int64, vals []interface{}) error {
 	zkey := c.KeyZsetComms(oid + cid)
 	redis.ZRemByScore(ctx, zkey, 0, stamp)
 
@@ -209,8 +205,7 @@ func (c *CacheHandle) InitZsetComms(ctx context.Context, oid, cid string,
 	return err
 }
 
-func (c *CacheHandle) ListZsetComms(ctx context.Context, oid, cid string,
-	stamp int64, limit int) ([]string, error) {
+func (c *CacheHandle) ListZsetComms(ctx context.Context, oid, cid string, stamp int64, limit int) ([]string, error) {
 	zkey := c.KeyZsetComms(oid + cid)
 	if ok := c.CheckZsetCommsKey(ctx, zkey); !ok {
 		return nil, errors.New("zset key ttl failed")

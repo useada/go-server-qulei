@@ -16,8 +16,7 @@ var DB = &DbHandle{}
 
 // -- Comment
 
-func (db *DbHandle) ListComments(ctx context.Context, oid, cid string, stamp int64,
-	limit int) (CommentModels, error) {
+func (db *DbHandle) ListComments(ctx context.Context, oid, cid string, stamp int64, limit int) (CommentModels, error) {
 	items := make(CommentModels, 0)
 	handle := func(c *mgo.Collection) error {
 		query := bson.M{"oid": oid, "cid": cid, "created_at": bson.M{"$lt": stamp}}
@@ -116,8 +115,7 @@ func (db *DbHandle) DelCommLike(ctx context.Context, id string) error {
 
 // -- Like
 
-func (db *DbHandle) ListLikes(ctx context.Context, oid string, stamp int64,
-	limit int) (LikeModels, error) {
+func (db *DbHandle) ListLikes(ctx context.Context, oid string, stamp int64, limit int) (LikeModels, error) {
 	items := make(LikeModels, 0)
 	handle := func(c *mgo.Collection) error {
 		query := bson.M{"oid": oid, "created_at": bson.M{"$lt": stamp}}

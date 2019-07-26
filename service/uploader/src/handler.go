@@ -20,8 +20,7 @@ func RegisterHandler(svr *grpc.Server) {
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) Upload(ctx context.Context,
-	in *pb.FileUploadArgs) (*pb.FileInfo, error) {
+func (s *SvrHandler) Upload(ctx context.Context, in *pb.FileUploadArgs) (*pb.FileInfo, error) {
 	if in.Type != pb.TYPE_FILE { // 如果是图片 解析图片 获取宽/高
 		img, _, _ := image.DecodeConfig(bytes.NewReader(in.Data))
 		in.Width, in.Height = int32(img.Width), int32(img.Height)
@@ -38,9 +37,7 @@ func (s *SvrHandler) Upload(ctx context.Context,
 	return pitem.ConstructPb(), nil
 }
 
-func (s *SvrHandler) Query(ctx context.Context,
-	in *pb.FileQueryArgs) (*pb.FileInfo, error) {
-
+func (s *SvrHandler) Query(ctx context.Context, in *pb.FileQueryArgs) (*pb.FileInfo, error) {
 	pitem, err := DB.GetFileInfo(ctx, in.Id)
 	if err != nil {
 		return nil, err

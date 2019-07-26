@@ -8,29 +8,25 @@ import (
 
 // Token 分页口令, 包含下一分页的参数
 type Token struct {
-	Offset int64 `json:"offset"` // created_at / updated_at / price
-	Limit  int   `json:"limit"`  //
+	Offset int64  `json:"offset"` // created_at / updated_at / price
+	Limit  int    `json:"limit"`  // 20 / 50 /100
+	Order  string `json:"order"`  // "id desc" / "updated_at asc"
 }
 
 // Default Token
-func Default(offset int64, limit int) (string, error) {
-	bytes, err := json.Marshal(Token{
+func Default(offset int64, limit int) string {
+	bytes, _ := json.Marshal(Token{
 		Offset: offset,
 		Limit:  limit,
+		Order:  "",
 	})
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(bytes), nil
+	return base64.StdEncoding.EncodeToString(bytes)
 }
 
 // Encode 返回一个 base64 字符串
-func (t *Token) Encode() (string, error) {
-	bytes, err := json.Marshal(*t)
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(bytes), nil
+func (t *Token) Encode() string {
+	bytes, _ := json.Marshal(*t)
+	return base64.StdEncoding.EncodeToString(bytes)
 }
 
 // Decode ...

@@ -16,8 +16,7 @@ func RegisterHandler(svr *grpc.Server) {
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) UsersByName(ctx context.Context,
-	in *pb.UsersByNameArgs) (*pb.UserInfos, error) {
+func (s *SvrHandler) UsersByName(ctx context.Context, in *pb.UsersByNameArgs) (*pb.UserInfos, error) {
 	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	ptok := page.Token{}
@@ -32,16 +31,13 @@ func (s *SvrHandler) UsersByName(ctx context.Context,
 
 	// 生成新的page_token
 	ptok.Offset += int64(len(rows))
-	if res.PageToken, err = ptok.Encode(); err != nil {
-		return &res, err
-	}
+	res.PageToken = ptok.Encode()
 
 	s.transUserInfo(&res, rows)
 	return &res, nil
 }
 
-func (s *SvrHandler) UsersByNear(ctx context.Context,
-	in *pb.UsersByNearArgs) (*pb.UserInfos, error) {
+func (s *SvrHandler) UsersByNear(ctx context.Context, in *pb.UsersByNearArgs) (*pb.UserInfos, error) {
 	res := pb.UserInfos{Items: make([](*pb.UserInfo), 0)}
 
 	ptok := page.Token{}
@@ -57,9 +53,7 @@ func (s *SvrHandler) UsersByNear(ctx context.Context,
 
 	// 生成新的page_token
 	ptok.Offset += int64(len(rows))
-	if res.PageToken, err = ptok.Encode(); err != nil {
-		return &res, err
-	}
+	res.PageToken = ptok.Encode()
 
 	s.transUserInfo(&res, rows)
 	return &res, nil

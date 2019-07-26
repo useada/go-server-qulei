@@ -37,9 +37,13 @@ func GetConn(service string) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func newConn(host, service string) (*grpc.ClientConn, error) {
-	r := consul.NewResolver(host, service)
-	return grpc.Dial("", grpc.WithInsecure(),
+func newConn(discovery, service string) (*grpc.ClientConn, error) {
+	r, err := consul.NewResolver(discovery)
+	if err != nil {
+		return nil, err
+	}
+
+	return grpc.Dial(service, grpc.WithInsecure(),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			PermitWithoutStream: true,
 			Time:                500 * time.Millisecond,

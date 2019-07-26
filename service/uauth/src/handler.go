@@ -16,46 +16,36 @@ func RegisterHandler(svr *grpc.Server) {
 
 type SvrHandler struct{}
 
-func (s *SvrHandler) Login(ctx context.Context,
-	in *pb.AuthLoginArgs) (*pb.AuthTokenInfo, error) {
+func (s *SvrHandler) Login(ctx context.Context, in *pb.AuthLoginArgs) (*pb.AuthTokenInfo, error) {
 	uid, err := checkLogin(ctx, in)
 	fmt.Println(uid, err)
 
 	return nil, nil
 }
 
-func (s *SvrHandler) Passwd(ctx context.Context,
-	in *pb.AuthPasswdArgs) (*pb.AuthTokenInfo, error) {
+func (s *SvrHandler) Passwd(ctx context.Context, in *pb.AuthPasswdArgs) (*pb.AuthTokenInfo, error) {
 	return nil, nil
 }
 
-func (s *SvrHandler) Refresh(ctx context.Context,
-	in *pb.AuthRefreshArgs) (*pb.AuthTokenInfo, error) {
+func (s *SvrHandler) Refresh(ctx context.Context, in *pb.AuthRefreshArgs) (*pb.AuthTokenInfo, error) {
 	return nil, nil
 }
 
-func (s *SvrHandler) Bind(ctx context.Context,
-	in *pb.AuthBindArgs) (*pb.AuthUserInfo, error) {
+func (s *SvrHandler) Bind(ctx context.Context, in *pb.AuthBindArgs) (*pb.AuthUserInfo, error) {
 	return nil, nil
 }
 
-func (s *SvrHandler) UnBind(ctx context.Context,
-	in *pb.AuthUnBindArgs) (*pb.AuthUserInfo, error) {
+func (s *SvrHandler) UnBind(ctx context.Context, in *pb.AuthUnBindArgs) (*pb.AuthUserInfo, error) {
 	return nil, nil
 }
 
-func (s *SvrHandler) Detail(ctx context.Context,
-	in *pb.AuthDetailArgs) (*pb.AuthUserInfo, error) {
+func (s *SvrHandler) Detail(ctx context.Context, in *pb.AuthDetailArgs) (*pb.AuthUserInfo, error) {
 	return nil, nil
 }
 
-func (s *SvrHandler) checkLogin(ctx context.Context,
-	in *pb.AuthLoginArgs) (string, error) {
+func (s *SvrHandler) checkLogin(ctx context.Context, in *pb.AuthLoginArgs) (string, error) {
 	switch in.Method {
 	case pb.AuthMethod_PASSWD:
-		data, err := getDetail(map[string]{}{
-			"uname": in.Openid,
-		})
 		return checkPasswd(ctx, in.Openid, in.Code)
 	case pb.AuthMethod_SMS:
 		return checkSmsCode(ctx, in.Openid, in.Code)
@@ -67,13 +57,11 @@ func (s *SvrHandler) checkLogin(ctx context.Context,
 	return "", errors.New("login method don't support")
 }
 
-func (s *SvrHandler) checkPasswd(ctx context.Context,
-	openid, code string) (string, error) {
+func (s *SvrHandler) checkPasswd(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }
 
-func (s *SvrHandler) checkSmsCode(ctx context.Context,
-	openid, code string) (string, error) {
+func (s *SvrHandler) checkSmsCode(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }
 

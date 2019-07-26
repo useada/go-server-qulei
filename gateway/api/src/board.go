@@ -4,9 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"a.com/go-server/common/page"
 	"a.com/go-server/gclient"
-	"a.com/go-server/proto/ct"
 	"a.com/go-server/proto/pb"
 )
 
@@ -15,21 +13,15 @@ type BoardHandler struct {
 
 var Board *BoardHandler
 
-const (
-	BOARD_PAGE_COUNT = 20
-)
-
 func (b *BoardHandler) ListComments(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		Cid       string `form:"cid"` // cid != "" 拉取二级评论
 		PageToken string `form:"page_token"`
 	}
+
 	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
-	}
-	if args.PageToken == "" {
-		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
 	/* for test
@@ -165,11 +157,9 @@ func (b *BoardHandler) ListLikes(ctx *gin.Context) *JSONResponse {
 		Oid       string `form:"oid" binding:"required"`
 		PageToken string `form:"page_token"`
 	}
+
 	if err := ctx.ShouldBindWith(&args, binding.Query); err != nil {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
-	}
-	if args.PageToken == "" {
-		args.PageToken, _ = page.Default(ct.TIME_INF_MAX, BOARD_PAGE_COUNT)
 	}
 
 	res, err := gclient.Board.ListLikes(ctx.Request.Context(), &pb.LikeListArgs{

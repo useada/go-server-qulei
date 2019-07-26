@@ -16,17 +16,21 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig
-	Logger logger.Config
-	Consul consul.Config
-	Redis  redis.Config
-	Mysql  []mysql.Config
+	Server    ServerConfig
+	Discovery DiscoveryConfig
+	Logger    logger.Config
+	Redis     redis.Config
+	Mysql     []mysql.Config
 }
 
 type ServerConfig struct {
 	Name string
 	Host string
 	Port int
+}
+
+type DiscoveryConfig struct {
+	Addr string
 }
 
 var (
@@ -63,7 +67,7 @@ func main() {
 	server := grpc.NewServer()
 	RegisterHandler(server)
 
-	if err := consul.NewRegister(Conf.Consul).
+	if err := consul.NewRegister(Conf.Discovery.Addr).
 		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
