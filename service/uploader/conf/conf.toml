@@ -28,8 +28,10 @@ option = "charset=utf8mb4"
     auth = "mysql_user:V3CSDJ3Gtg"
     max_idle = 5
     max_open = 30
+    max_life = 3000
   [[mysql.slave]]
     host = "192.168.200.191:3306"
     auth = "mysql_user:V3CSDJ3Gtg"
     max_idle = 5
     max_open = 30
+    max_life = 3000

@@ -37,6 +37,7 @@ func (b *BoardHandler) ListComments(ctx *gin.Context) *JSONResponse {
 	if err != nil {
 		return ErrorResponse(INTERNEL_ERR, err.Error())
 	}
+
 	return SuccessResponse(res)
 }
 

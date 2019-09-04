@@ -3,6 +3,7 @@ package mysql
 import (
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -13,6 +14,7 @@ type ConfigNode struct {
 	Auth    string
 	MaxIdle int `toml:"max_idle"`
 	MaxOpen int `toml:"max_open"`
+	MaxLife int `toml:"max_life"`
 }
 
 type Config struct {
@@ -57,6 +59,7 @@ func connect(dbname string, dboption string, node ConfigNode) (*gorm.DB, error) 
 	orm.LogMode(true)
 	orm.DB().SetMaxIdleConns(node.MaxIdle)
 	orm.DB().SetMaxOpenConns(node.MaxOpen)
+	orm.DB().SetConnMaxLifetime(time.Duration(node.MaxLife) * time.Second)
 	return orm, nil
 }
 
