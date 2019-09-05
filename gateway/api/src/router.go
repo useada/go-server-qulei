@@ -39,7 +39,7 @@ func Router() *gin.Engine {
 		board.GET("/like/list", ResponseWrapper(Board.ListLikes))
 		board.POST("/like/new", ResponseWrapper(Board.NewLike))
 		board.POST("/like/del", ResponseWrapper(Board.DelLike))
-		board.POST("/summary/mget", ResponseWrapper(Board.MutiGetSummary)) // 应该在feed接口里被调用
+		board.POST("/summary/gets", ResponseWrapper(Board.GetSummaries)) // 应该在feed接口里被调用
 	}
 
 	// 搜索

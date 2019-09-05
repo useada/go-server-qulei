@@ -211,7 +211,7 @@ func (b *BoardHandler) DelLike(ctx *gin.Context) *JSONResponse {
 	return SuccessResponse(res)
 }
 
-func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JSONResponse {
+func (b *BoardHandler) GetSummaries(ctx *gin.Context) *JSONResponse {
 	var args struct {
 		Oids []string `json:"oids" binding:"required"`
 	}
@@ -219,7 +219,7 @@ func (b *BoardHandler) MutiGetSummary(ctx *gin.Context) *JSONResponse {
 		return ErrorResponse(ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := gclient.Board.MutiGetSummary(ctx.Request.Context(), &pb.BoardSummaryArgs{
+	res, err := gclient.Board.GetSummaries(ctx.Request.Context(), &pb.SummaryArgs{
 		Uid:  "testuid", // TODO
 		Oids: args.Oids,
 	})

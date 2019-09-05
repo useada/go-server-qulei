@@ -18,7 +18,7 @@ var UnlockScript = redis.NewScript(1, `
 	end
 `)
 
-func TryLock(c context.Context, s string, ttl int64) (string, error) {
+func (p *Pool) TryLock(c context.Context, s string, ttl int64) (string, error) {
 	ticket := fmt.Sprintf("%s%d", s, time.Now().UnixNano())
 	handle := func(conn redis.Conn) error {
 		res, err := conn.Do("SET", key(s), ticket, "PX", ttl, "NX")
@@ -27,10 +27,10 @@ func TryLock(c context.Context, s string, ttl int64) (string, error) {
 		}
 		return err
 	}
-	return ticket, Doit(c, "lock", handle)
+	return ticket, p.Doit(c, "lock", handle)
 }
 
-func UnLock(c context.Context, s, ticket string) error {
+func (p *Pool) UnLock(c context.Context, s, ticket string) error {
 	handle := func(conn redis.Conn) error {
 		ret, err := UnlockScript.Do(conn, key(s), ticket)
 		if ret == 0 {
@@ -38,7 +38,7 @@ func UnLock(c context.Context, s, ticket string) error {
 		}
 		return err
 	}
-	return Doit(c, "unlock", handle)
+	return p.Doit(c, "unlock", handle)
 }
 
 func key(s string) string {

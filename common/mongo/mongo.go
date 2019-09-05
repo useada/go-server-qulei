@@ -17,34 +17,42 @@ type Config struct {
 	Database []string
 }
 
-func Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) error {
+type Pool struct {
+	Sessions map[string]*mgo.Session
+}
+
+func (p *Pool) Doit(c context.Context, db, collect string, h func(*mgo.Collection) error) error {
 	span := tracing.StartDBSpan(c, "mongo", "do")
 	defer span.Finish()
 
-	sess, ok := gMgo[db]
+	session, ok := p.Sessions[db]
 	if !ok {
 		return errors.New("mongo session is nil")
 	}
-	conn := sess.Copy()
+	conn := session.Copy()
+
 	defer conn.Close()
 	return h(conn.DB(db).C(collect))
 }
 
-var gMgo map[string]*mgo.Session
+func NewPool(conf Config) *Pool {
+	pool := &Pool{
+		Sessions: make(map[string]*mgo.Session),
+	}
 
-func Init(conf Config) error {
-	gMgo = make(map[string]*mgo.Session)
 	for _, db := range conf.Database {
 		addr := "mongodb://" + conf.Auth + conf.Host + "/" + db
-		fmt.Println("初始化Mongo数据库:", addr, " 连接池")
 
-		sess, err := mgo.DialWithTimeout(addr, 10*time.Second)
+		session, err := mgo.DialWithTimeout(addr, 10*time.Second)
 		if err != nil {
 			fmt.Println("Mongo数据库: ", db, "连接异常! ", err)
-			return err
+			panic(err)
 		}
-		sess.SetMode(mgo.Monotonic, true)
-		gMgo[db] = sess
+
+		session.SetMode(mgo.Monotonic, true)
+		pool.Sessions[db] = session
 	}
-	return nil
+
+	fmt.Println("初始化Mongo连接池 FINISH")
+	return pool
 }

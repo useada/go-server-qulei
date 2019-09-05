@@ -102,14 +102,14 @@ func (b *BoardClient) DelLike(c context.Context, args *pb.LikeDelArgs) (*pb.Repl
 	return pb.NewBoardClient(conn).DelLike(ctx, args)
 }
 
-func (b *BoardClient) MutiGetSummary(c context.Context, args *pb.BoardSummaryArgs) (*pb.BoardSummaryInfos, error) {
+func (b *BoardClient) GetSummaries(c context.Context, args *pb.SummaryArgs) (*pb.SummaryInfos, error) {
 	conn, err := GetConn(b.service())
 	if err != nil {
 		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(c, b.timeout())
 	defer cancel()
-	return pb.NewBoardClient(conn).MutiGetSummary(ctx, args)
+	return pb.NewBoardClient(conn).GetSummaries(ctx, args)
 }
 
 func (b *BoardClient) timeout() time.Duration {

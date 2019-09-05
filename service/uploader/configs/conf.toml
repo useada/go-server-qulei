@@ -1,0 +1,37 @@
+[server]
+name = "uploader"
+host = ":18091"
+port = 18091
+logpath = "/data/logs/uploader/"
+
+[logger]
+file_path = "/Users/qulei/workspace/src/a.com/go-server/uploader/logs/logs.log"
+max_size = 1024   # 1G
+max_backups = 2   # 2 copy
+max_age = 20      # 20 days
+level = 0         # INFO
+compress = false
+
+[discovery]
+addr = "127.0.0.1:8500"
+
+[s3]
+region = "us-east-2"
+acl = "private"
+bucket= "test-bucket"
+
+[[mysql]]
+name = "uploader"
+option = "charset=utf8mb4"
+  [mysql.master]
+    host = "192.168.200.191:3306"
+    auth = "mysql_user:V3CSDJ3Gtg"
+    max_idle = 5
+    max_open = 30
+    max_life = 3000
+  [[mysql.slave]]
+    host = "192.168.200.191:3306"
+    auth = "mysql_user:V3CSDJ3Gtg"
+    max_idle = 5
+    max_open = 30
+    max_life = 3000

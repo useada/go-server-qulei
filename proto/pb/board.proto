@@ -10,6 +10,7 @@ service Board {
     rpc GetComment(CommGetArgs) returns (CommentInfo) {}          // 获取评论
     rpc NewComment(CommNewArgs) returns (ReplyBaseInfo) {}        // 创建评论
     rpc DelComment(CommDelArgs) returns (ReplyBaseInfo) {}        // 删除评论
+
     rpc LikeComment(CommLikeArgs) returns (ReplyBaseInfo) {}      // 对评论点赞
     rpc UnLikeComment(CommUnLikeArgs) returns (ReplyBaseInfo) {}  // 取消对评论点的赞
 
@@ -19,7 +20,7 @@ service Board {
     rpc DelLike(LikeDelArgs) returns (ReplyBaseInfo) {} // 删除点赞
 
     // 对象的评论点赞汇总信息
-    rpc MutiGetSummary(BoardSummaryArgs) returns (BoardSummaryInfos) {}
+    rpc GetSummaries(SummaryArgs) returns (SummaryInfos) {}
 }
 
 // 评论Request
@@ -86,7 +87,7 @@ message LikeDelArgs {
     string uid = 2;
 }
 
-message BoardSummaryArgs {
+message SummaryArgs {
     string           uid = 1;
     repeated string oids = 2;
 }
@@ -126,7 +127,7 @@ message LikeInfos {
     string            page_token = 2;
 }
 
-message BoardSummaryInfo {
+message SummaryInfo {
     string id                = 1; //   object id
     int32  comms_count       = 2; //   总评论数
     int32  comms_first_count = 3; // 一级评论数
@@ -135,6 +136,6 @@ message BoardSummaryInfo {
     bool   is_liking         = 6;
 }
 
-message BoardSummaryInfos {
-    repeated BoardSummaryInfo items = 1;
+message SummaryInfos {
+    repeated SummaryInfo items = 1;
 }
