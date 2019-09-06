@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	TTL_ZSET_CRITICAL = 1            // 2 * (redis read/write timeout 500ms)
+	TTL_ZSET_CRITICAL = 600          // 1 * (redis read/write timeout 500ms)
 	TTL_ZSET_KEY      = 3600 * 9     //
 	TTL_HASH_KEY      = 3600 * 9 * 3 //
 )
@@ -90,9 +90,6 @@ func (k *kv) DelComment(ctx context.Context, oid, id string) error {
 
 func (k *kv) RangeComments(ctx context.Context, oid, cid string, stamp int64, limit int) ([]string, error) {
 	zkey := k.genZsetKey(oid + cid)
-	if ok := k.ttlCommentKey(ctx, zkey); !ok {
-		return nil, errors.New("zset key ttl failed")
-	}
 
 	ids, err := k.Pool.ZRevRangeByScore(ctx, zkey, stamp-1, constant.TIME_INF_MIN, limit)
 	if err != nil {
@@ -146,6 +143,10 @@ func (k *kv) pushComments(ctx context.Context, oid, cid string, stamp int64, val
 
 func (k *kv) pushComment(ctx context.Context, pitem *model.Comment) error {
 	zkey := k.genZsetKey(pitem.Oid + pitem.Cid)
+	if ok := k.ttlCommentKey(ctx, zkey); !ok {
+		return nil
+	}
+
 	err := k.Pool.ZAdd(ctx, zkey, pitem.CreatedAt, pitem.ID)
 	if err != nil {
 		k.Pool.Delete(ctx, zkey)
@@ -157,9 +158,6 @@ func (k *kv) pushComment(ctx context.Context, pitem *model.Comment) error {
 
 func (k *kv) popComment(ctx context.Context, oid, cid, id string) error {
 	zkey := k.genZsetKey(oid + cid)
-	if ok := k.ttlCommentKey(ctx, zkey); !ok {
-		return errors.New("check zset key ttl error")
-	}
 
 	err := k.Pool.ZRem(ctx, zkey, id)
 	if err != nil {
@@ -179,7 +177,10 @@ func (k *kv) ttlCommentKey(ctx context.Context, zkey string) bool {
 	if val == -1 { // val: -1 永不过期
 		return true
 	}
-	if val <= TTL_ZSET_CRITICAL { // 即将超时 / val: -2 过期或不存在
+	if val == -2 {
+		return false // val: -2 过期或不存在
+	}
+	if val <= TTL_ZSET_CRITICAL { // 即将超时
 		return false
 	}
 	return true

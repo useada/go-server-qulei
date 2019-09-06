@@ -5,7 +5,7 @@ port = 18093
 logpath = "/data/logs/board/"
 
 [logger]
-file_path = "/Users/qulei/workspace/src/a.com/go-server/board/logs/logs.log"
+file_path = "/Users/qulei/workspace/src/a.com/go-server/service/board/logs/logs.log"
 max_size = 1024   # 1G
 max_backups = 2   # 2 copy
 max_age = 20      # 20 days
