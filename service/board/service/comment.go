@@ -125,8 +125,7 @@ func (s *SvrHandler) listStoreComms(ctx context.Context, oid, cid string, ptk pa
 
 func (s *SvrHandler) packCommentInfos(ctx context.Context, items model.Comments, ptk page.Token, uid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
-		Items:     make([]*pb.CommentInfo, 0),
-		PageToken: "",
+		Items: make([]*pb.CommentInfo, 0),
 	}
 
 	if ptk.Limit+1 <= len(items) {

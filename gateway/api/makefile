@@ -1,11 +1,9 @@
 all:
 	cd ../../proto/pb/ && ./gen.sh
-	make -C src
-	test -d ./bin/ || mkdir -p ./bin/
-	@mv ./src/gateway-api ./bin/
-	@echo all done.
+	@go build -o gateway-api
+	@echo done.
 
 clean:
 	cd ../../proto/pb/ && ./clear.sh
-	@rm -f ./bin/gateway-api
-	@make -C src clean
+	@go clean
+	@rm -f ./gateway-api

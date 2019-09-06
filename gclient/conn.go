@@ -12,32 +12,53 @@ import (
 	"a.com/go-server/common/tracing"
 )
 
-var GrpcConns map[string]*grpc.ClientConn
-
-func Init(consul string, services []string) error {
-	if len(consul) == 0 || len(services) == 0 {
-		return errors.New("consul or services empty")
-	}
-	GrpcConns = make(map[string]*grpc.ClientConn, len(services))
-	for _, service := range services {
-		conn, err := newConn(consul, service)
-		if err != nil {
-			return err
-		}
-		GrpcConns[service] = conn
-	}
-	return nil
+type Client struct {
+	Conns         map[string]*grpc.ClientConn
+	RequstTimeout int64
 }
 
-func GetConn(service string) (*grpc.ClientConn, error) {
-	conn, ok := GrpcConns[service]
+func (cli *Client) Get(service string) (*grpc.ClientConn, error) {
+	conn, ok := cli.Conns[service]
 	if !ok {
 		return nil, errors.New(service + " conn not exist")
 	}
 	return conn, nil
 }
 
-func newConn(discovery, service string) (*grpc.ClientConn, error) {
+func (cli *Client) timeout() time.Duration {
+	return time.Duration(cli.RequstTimeout) * time.Millisecond
+}
+
+type Config struct {
+	Discovery     string
+	Services      []string
+	RequstTimeout int64 `toml:"request_timeout"`
+}
+
+func NewGrpcClient(conf Config) *Client {
+	if len(conf.Discovery) == 0 || len(conf.Services) == 0 {
+		panic("discovery or services empty")
+	}
+	if conf.RequstTimeout == 0 {
+		conf.RequstTimeout = 500
+	}
+
+	client := &Client{
+		Conns:         make(map[string]*grpc.ClientConn, len(conf.Services)),
+		RequstTimeout: conf.RequstTimeout,
+	}
+
+	for _, service := range conf.Services {
+		conn, err := connect(conf.Discovery, service)
+		if err != nil {
+			panic(err)
+		}
+		client.Conns[service] = conn
+	}
+	return client
+}
+
+func connect(discovery, service string) (*grpc.ClientConn, error) {
 	r, err := consul.NewResolver(discovery)
 	if err != nil {
 		return nil, err

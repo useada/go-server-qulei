@@ -392,42 +392,51 @@ type Config struct {
 }
 
 func NewPool(conf Config) *Pool {
-	pool := &Pool{}
-	pool.Connections = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", conf.Host)
-			if nil != err {
-				return nil, err
-			}
-			if conf.Auth != "" {
-				if _, err := c.Do("AUTH", conf.Auth); err != nil {
-					c.Close()
-					return nil, err
-				}
-			} else {
-				// check with PING
-				if _, err := c.Do("PING"); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
-			if _, err := c.Do("SELECT", conf.Index); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
+	pool := &Pool{
+		Connections: &redis.Pool{
+			MaxIdle:      conf.MaxIdle,
+			MaxActive:    conf.MaxIdle * 3,
+			Dial:         dialfunc(conf),
+			TestOnBorrow: testfunc(),
+			Wait:         true,
+			IdleTimeout:  240 * time.Second,
 		},
-		// custom connection test method
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			if _, err := c.Do("PING"); err != nil {
-				return err
-			}
-			return nil
-		},
-		MaxIdle:     conf.MaxIdle,
-		IdleTimeout: 240 * time.Second,
 	}
 
 	fmt.Println("初始化Redis连接池 FINISH")
 	return pool
+}
+
+func dialfunc(conf Config) func() (redis.Conn, error) {
+	return func() (redis.Conn, error) {
+		c, err := redis.Dial("tcp", conf.Host,
+			redis.DialConnectTimeout(time.Duration(100)*time.Millisecond),
+			redis.DialReadTimeout(time.Duration(300)*time.Millisecond),
+			redis.DialWriteTimeout(time.Duration(300)*time.Millisecond))
+		if err != nil {
+			return nil, err
+		}
+		if conf.Auth != "" {
+			if _, err := c.Do("AUTH", conf.Auth); err != nil {
+				c.Close()
+				return nil, err
+			}
+		}
+		if _, err := c.Do("SELECT", conf.Index); err != nil {
+			c.Close()
+			return nil, err
+		}
+		return c, nil
+	}
+}
+
+func testfunc() func(c redis.Conn, t time.Time) error {
+	return func(c redis.Conn, t time.Time) error {
+		if time.Since(t) < time.Minute {
+			return nil
+		}
+
+		_, err := c.Do("PING")
+		return err
+	}
 }

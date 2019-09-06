@@ -1,0 +1,17 @@
+[server]
+name = "gateway-api"
+host = ":8091"
+port = 8091
+
+[logger]
+file_path = "/Users/qulei/workspace/src/a.com/go-server/gateway/api/logs/logs.log"
+max_size = 1024   # 1G
+max_backups = 2   # 2 copy
+max_age = 20      # 20 days
+level = 0         # INFO
+compress = false
+
+[grpc]
+discovery = "127.0.0.1:8500"
+services = ["board", "xxx"]
+request_timeout = 300 #ms

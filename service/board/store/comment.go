@@ -50,11 +50,9 @@ func (d *db) DelComment(ctx context.Context, id string) error {
 
 func (d *db) IncrCommReply(ctx context.Context, cid string, pitem *model.Comment) error {
 	handle := func(c *mgo.Collection) error {
-		replys := bson.M{"$each": model.Comments{*pitem},
-			"$sort": bson.M{"created_at": -1}, "$slice": 2}
+		replys := bson.M{"$each": model.Comments{*pitem}, "$sort": bson.M{"created_at": -1}, "$slice": 2}
 		return c.Update(bson.M{"_id": cid},
-			bson.M{"$push": bson.M{"replys": replys},
-				"$inc": bson.M{"reply_count": 1}})
+			bson.M{"$push": bson.M{"replys": replys}, "$inc": bson.M{"reply_count": 1}})
 	}
 	return d.Pool.Doit(ctx, "BoardComment", "comment", handle)
 }
@@ -62,8 +60,7 @@ func (d *db) IncrCommReply(ctx context.Context, cid string, pitem *model.Comment
 func (d *db) DecrCommReply(ctx context.Context, cid, rid string) error {
 	handle := func(c *mgo.Collection) error {
 		return c.Update(bson.M{"_id": cid},
-			bson.M{"$pull": bson.M{"replys": bson.M{"_id": rid}},
-				"$inc": bson.M{"reply_count": -1}})
+			bson.M{"$pull": bson.M{"replys": bson.M{"_id": rid}}, "$inc": bson.M{"reply_count": -1}})
 	}
 	return d.Pool.Doit(ctx, "BoardComment", "comment", handle)
 }
