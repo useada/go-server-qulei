@@ -19,7 +19,7 @@ type Store interface {
 	DecrCommLike(ctx context.Context, cid string) error
 
 	// Comment Like
-	ListUserCommLikes(ctx context.Context, uid string) (model.CommentLikes, error)
+	ListUserCommLikes(ctx context.Context, uid, oid string) (model.CommentLikes, error)
 	NewCommLike(ctx context.Context, pitem *model.CommentLike) error
 	DelCommLike(ctx context.Context, id string) error
 

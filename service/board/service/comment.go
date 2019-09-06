@@ -27,7 +27,7 @@ func (s *SvrHandler) ListComments(ctx context.Context, in *pb.CommListArgs) (*pb
 	items, err := s.listCacheComms(ctx, in.Oid, in.Cid, ptk)
 	if err == nil {
 		sort.Sort(items)
-		return s.packCommentInfos(ctx, items, ptk, in.Uid)
+		return s.packCommentInfos(ctx, items, ptk, in.Uid, in.Oid)
 	}
 
 	items, err = s.listStoreComms(ctx, in.Oid, in.Cid, ptk)
@@ -35,19 +35,19 @@ func (s *SvrHandler) ListComments(ctx context.Context, in *pb.CommListArgs) (*pb
 		s.Log.Error("list db comments oid:%s cid:%s err:%v", in.Oid, in.Cid, err)
 		return nil, err
 	}
-	return s.packCommentInfos(ctx, items, ptk, in.Uid)
+	return s.packCommentInfos(ctx, items, ptk, in.Uid, in.Oid)
 }
 
 func (s *SvrHandler) GetComment(ctx context.Context, in *pb.CommGetArgs) (*pb.CommentInfo, error) {
 	pitem, err := s.Cache.GetComment(ctx, in.Oid, in.Id)
 	if err == nil {
-		return s.packCommentInfo(ctx, pitem, in.Uid)
+		return s.packCommentInfo(ctx, pitem, in.Uid, in.Oid)
 	}
 
 	if pitem, err = s.Store.GetComment(ctx, in.Id); err == nil {
 		s.Cache.SetComment(ctx, pitem)
 	}
-	return s.packCommentInfo(ctx, pitem, in.Uid)
+	return s.packCommentInfo(ctx, pitem, in.Uid, in.Oid)
 }
 
 func (s *SvrHandler) NewComment(ctx context.Context, in *pb.CommNewArgs) (*pb.ReplyBaseInfo, error) {
@@ -123,7 +123,7 @@ func (s *SvrHandler) listStoreComms(ctx context.Context, oid, cid string, ptk pa
 	return items, nil
 }
 
-func (s *SvrHandler) packCommentInfos(ctx context.Context, items model.Comments, ptk page.Token, uid string) (*pb.CommentInfos, error) {
+func (s *SvrHandler) packCommentInfos(ctx context.Context, items model.Comments, ptk page.Token, uid, oid string) (*pb.CommentInfos, error) {
 	res := &pb.CommentInfos{
 		Items: make([]*pb.CommentInfo, 0),
 	}
@@ -133,7 +133,7 @@ func (s *SvrHandler) packCommentInfos(ctx context.Context, items model.Comments,
 		res.PageToken = ptk.Encode()
 	}
 
-	xmap := s.userCommLikes(ctx, uid)
+	xmap := s.listUserCommLikes(ctx, uid, oid)
 	for _, item := range items {
 		if len(res.Items) == ptk.Limit {
 			break
@@ -146,8 +146,8 @@ func (s *SvrHandler) packCommentInfos(ctx context.Context, items model.Comments,
 	return res, nil
 }
 
-func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *model.Comment, uid string) (*pb.CommentInfo, error) {
-	xmap := s.userCommLikes(ctx, uid)
+func (s *SvrHandler) packCommentInfo(ctx context.Context, pitem *model.Comment, uid, oid string) (*pb.CommentInfo, error) {
+	xmap := s.listUserCommLikes(ctx, uid, oid)
 	if _, ok := xmap[pitem.Cid]; ok {
 		pitem.IsLiking = true
 	}
@@ -188,30 +188,4 @@ func (s *SvrHandler) diffCommIds(ctx context.Context, items model.Comments, ids 
 		}
 	}
 	return diffids
-}
-
-func (s *SvrHandler) userCommLikes(ctx context.Context, uid string) map[string]model.CommentLike {
-	xmap := make(map[string]model.CommentLike)
-	if len(uid) == 0 {
-		return xmap
-	}
-
-	citems, _ := s.Cache.ListUserCommLikes(ctx, uid)
-	for _, item := range citems {
-		xmap[item.Cid] = item
-	}
-	if len(xmap) > 0 {
-		return xmap
-	}
-
-	ditems, err := s.Store.ListUserCommLikes(ctx, uid)
-	if err == nil && len(ditems) == 0 {
-		ditems = append(ditems, model.CommentLike{ID: "GUARD-ID", Cid: "GUARD-Cid"})
-	}
-	s.Cache.NewUserCommLikes(ctx, uid, ditems)
-
-	for _, item := range ditems {
-		xmap[item.Cid] = item
-	}
-	return xmap
 }

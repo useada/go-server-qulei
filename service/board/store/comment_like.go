@@ -9,10 +9,10 @@ import (
 	"a.com/go-server/service/board/model"
 )
 
-func (d *db) ListUserCommLikes(ctx context.Context, uid string) (model.CommentLikes, error) {
+func (d *db) ListUserCommLikes(ctx context.Context, uid, oid string) (model.CommentLikes, error) {
 	items := make(model.CommentLikes, 0)
 	handle := func(c *mgo.Collection) error {
-		return c.Find(bson.M{"uid": uid}).Sort("-created_at").Limit(500).All(&items)
+		return c.Find(bson.M{"uid": uid, "oid": oid}).Sort("-created_at").Limit(500).All(&items)
 	}
 	return items, d.Pool.Doit(ctx, "BoardComment", "like", handle)
 }
