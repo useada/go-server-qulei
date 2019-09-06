@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"a.com/go-server/common/configor"
 	"a.com/go-server/common/logger"
 	"a.com/go-server/common/tracing"
@@ -39,7 +37,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println("----", Conf.Grpc)
 	svr := service.NewApiService(gclient.NewGrpcClient(Conf.Grpc),
 		logger.InitLogger(Conf.Logger))
 	router.BindRouter(svr).Run(Conf.Server.Host)

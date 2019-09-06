@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
@@ -21,9 +23,7 @@ func (s *Service) ListComments(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	/* for test
-	fmt.Println(tracing.GetID(ctx.Request.Context()))
-	*/
+	fmt.Println("--------", s.TraceId(ctx))
 
 	res, err := s.Grpc.ListComments(ctx.Request.Context(), &pb.CommListArgs{
 		Oid:       args.Oid,
