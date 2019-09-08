@@ -1,6 +1,6 @@
 all:
 	cd ../../proto/pb/ && ./gen.sh
-	@go build -o board
+	@go build -o board cmd/*.go
 	@echo done.
 
 clean:

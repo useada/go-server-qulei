@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"a.com/go-server/proto/pb"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (s *SvrHandler) LikeComment(ctx context.Context, in *pb.CommLikeArgs) (*pb.ReplyBaseInfo, error) {

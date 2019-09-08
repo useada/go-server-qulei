@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (d *db) GetSummaries(ctx context.Context, ids []string) (model.Summaries, error) {

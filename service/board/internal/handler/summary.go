@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"a.com/go-server/proto/pb"
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (s *SvrHandler) GetSummaries(ctx context.Context, in *pb.SummaryArgs) (*pb.SummaryInfos, error) {

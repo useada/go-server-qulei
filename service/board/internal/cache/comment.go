@@ -9,7 +9,7 @@ import (
 
 	"a.com/go-server/proto/constant"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 const (

@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"a.com/go-server/proto/constant"
 	"a.com/go-server/proto/pb"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (s *SvrHandler) ListComments(ctx context.Context, in *pb.CommListArgs) (*pb.CommentInfos, error) {

@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"a.com/go-server/proto/constant"
 	"a.com/go-server/proto/pb"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (s *SvrHandler) ListLikes(ctx context.Context, in *pb.LikeListArgs) (*pb.LikeInfos, error) {
@@ -66,8 +66,7 @@ func (s *SvrHandler) DelLike(ctx context.Context, in *pb.LikeDelArgs) (*pb.Reply
 
 func (s *SvrHandler) packLikeInfos(ctx context.Context, items model.Likes, ptk page.Token) (*pb.LikeInfos, error) {
 	res := &pb.LikeInfos{
-		Items:     make([]*pb.LikeInfo, 0),
-		PageToken: "",
+		Items: make([]*pb.LikeInfo, 0),
 	}
 
 	if ptk.Limit+1 <= len(items) {

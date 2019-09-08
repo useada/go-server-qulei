@@ -1,9 +1,11 @@
 package store
 
+//go:generate mockgen -destination=../mock/store_mock.go -package=mock a.com/go-server/service/board/internal/store Store
+
 import (
 	"context"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 type Store interface {

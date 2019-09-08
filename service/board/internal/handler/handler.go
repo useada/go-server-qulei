@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"go.uber.org/zap"
@@ -6,8 +6,8 @@ import (
 
 	"a.com/go-server/proto/pb"
 
-	"a.com/go-server/service/board/cache"
-	"a.com/go-server/service/board/store"
+	"a.com/go-server/service/board/internal/cache"
+	"a.com/go-server/service/board/internal/store"
 )
 
 const (

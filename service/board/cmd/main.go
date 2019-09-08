@@ -15,9 +15,9 @@ import (
 	"a.com/go-server/common/redis"
 	"a.com/go-server/common/tracing"
 
-	"a.com/go-server/service/board/cache"
-	"a.com/go-server/service/board/service"
-	"a.com/go-server/service/board/store"
+	"a.com/go-server/service/board/internal/cache"
+	"a.com/go-server/service/board/internal/handler"
+	"a.com/go-server/service/board/internal/store"
 )
 
 type Config struct {
@@ -69,7 +69,7 @@ func main() {
 		grpc.UnaryInterceptor(tracing.GrpcServerInterceptor(opentracing.GlobalTracer())),
 	)
 
-	service.RegisterHandler(grpcSvr,
+	handler.RegisterHandler(grpcSvr,
 		cache.NewRedisRepo(redis.NewPool(Conf.Redis)),
 		store.NewMongoRepo(mongo.NewPool(Conf.Mongo)),
 		logger.InitLogger(Conf.Logger))

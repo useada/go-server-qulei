@@ -1,9 +1,11 @@
 package cache
 
+//go:generate mockgen -destination=../mock/cache_mock.go -package=mock a.com/go-server/service/board/internal/cache Cache
+
 import (
 	"context"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 type Cache interface {

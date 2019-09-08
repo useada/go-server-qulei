@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"a.com/go-server/service/board/model"
+	"a.com/go-server/service/board/internal/model"
 )
 
 func (k *kv) ListUserLikes(ctx context.Context, uid string) (model.Likes, error) {
