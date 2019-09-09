@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	"a.com/go-server/common/page"
 	"a.com/go-server/proto/pb"
-	"a.com/go-server/service/esearch/model"
-	"a.com/go-server/service/esearch/store"
+	"a.com/go-server/service/esearch/internal/model"
+	"a.com/go-server/service/esearch/internal/store"
 )
 
 func RegisterHandler(svr *grpc.Server, store store.Store, log *zap.SugaredLogger) {

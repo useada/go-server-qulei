@@ -13,9 +13,10 @@ import (
 	"a.com/go-server/common/logger"
 	"a.com/go-server/common/mysql"
 	"a.com/go-server/common/tracing"
-	"a.com/go-server/service/uploader/cloud"
-	"a.com/go-server/service/uploader/service"
-	"a.com/go-server/service/uploader/store"
+
+	"a.com/go-server/service/uploader/internal/cloud"
+	"a.com/go-server/service/uploader/internal/handler"
+	"a.com/go-server/service/uploader/internal/store"
 )
 
 type Config struct {
@@ -67,7 +68,7 @@ func main() {
 		grpc.UnaryInterceptor(tracing.GrpcServerInterceptor(opentracing.GlobalTracer())),
 	)
 
-	service.RegisterHandler(grpcSvr,
+	handler.RegisterHandler(grpcSvr,
 		store.NewMysqlRepo(mysql.NewPool(Conf.Mysql)),
 		cloud.NewS3Repo(cloud.NewS3Client(Conf.S3)),
 		logger.InitLogger(Conf.Logger))

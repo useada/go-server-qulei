@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"bytes"
@@ -12,9 +12,9 @@ import (
 	"google.golang.org/grpc"
 
 	"a.com/go-server/proto/pb"
-	"a.com/go-server/service/uploader/cloud"
-	"a.com/go-server/service/uploader/model"
-	"a.com/go-server/service/uploader/store"
+	"a.com/go-server/service/uploader/internal/cloud"
+	"a.com/go-server/service/uploader/internal/model"
+	"a.com/go-server/service/uploader/internal/store"
 )
 
 func RegisterHandler(svr *grpc.Server, store store.Store, cloud cloud.Cloud, log *zap.SugaredLogger) {

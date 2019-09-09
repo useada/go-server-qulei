@@ -2,6 +2,7 @@ package cloud
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -71,9 +72,12 @@ type Config struct {
 }
 
 func NewS3Client(conf Config) *S3Client {
-	return &S3Client{
+	client := &S3Client{
 		Bucket: conf.Bucket,
 		ACL:    conf.ACL,
 		Client: s3.New(session.Must(session.NewSession()), &aws.Config{Region: aws.String(conf.Region)}),
 	}
+
+	fmt.Println("")
+	return client
 }

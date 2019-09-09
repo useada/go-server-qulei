@@ -6,7 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"a.com/go-server/common/mysql"
-	"a.com/go-server/service/uploader/model"
+
+	"a.com/go-server/service/uploader/internal/model"
 )
 
 type db struct {

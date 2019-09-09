@@ -1,6 +1,6 @@
 all:
 	cd ../../proto/pb/ && ./gen.sh
-	@go build -o esearch
+	@go build -o esearch cmd/*.go
 	@echo done.
 
 

@@ -3,8 +3,9 @@ package store
 import (
 	"context"
 
-	"a.com/go-server/service/esearch/model"
 	elastic "gopkg.in/olivere/elastic.v5"
+
+	"a.com/go-server/service/esearch/internal/model"
 )
 
 type es struct {

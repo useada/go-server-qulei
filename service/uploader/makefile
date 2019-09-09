@@ -1,6 +1,6 @@
 all:
 	cd ../../proto/pb/ && ./gen.sh
-	@go build -o uploader
+	@go build -o uploader cmd/*.go
 	@echo done.
 
 clean:

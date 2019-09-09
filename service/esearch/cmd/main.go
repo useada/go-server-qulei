@@ -12,8 +12,9 @@ import (
 	"a.com/go-server/common/locip"
 	"a.com/go-server/common/logger"
 	"a.com/go-server/common/tracing"
-	"a.com/go-server/service/esearch/service"
-	"a.com/go-server/service/esearch/store"
+
+	"a.com/go-server/service/esearch/internal/handler"
+	"a.com/go-server/service/esearch/internal/store"
 )
 
 type Config struct {
@@ -64,7 +65,7 @@ func main() {
 		grpc.UnaryInterceptor(tracing.GrpcServerInterceptor(opentracing.GlobalTracer())),
 	)
 
-	service.RegisterHandler(grpcSvr,
+	handler.RegisterHandler(grpcSvr,
 		store.NewElasticRepo(store.NewElasticClient(Conf.Elastic)),
 		logger.InitLogger(Conf.Logger))
 
