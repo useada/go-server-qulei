@@ -1,20 +1,31 @@
-package main
+package handler
 
 import (
 	"context"
 	"errors"
 	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"a.com/go-server/proto/pb"
+	"a.com/go-server/service/uauth/internal/cache"
+	"a.com/go-server/service/uauth/internal/store"
 )
 
-func RegisterHandler(svr *grpc.Server) {
-	pb.RegisterUauthServer(svr, &SvrHandler{})
+func RegisterHandler(svr *grpc.Server, cache cache.Cache, store store.Store, log *zap.SugaredLogger) {
+	pb.RegisterUploaderServer(svr, &SvrHandler{
+		Cache: cache,
+		Store: store,
+		Log:   log,
+	})
 }
 
-type SvrHandler struct{}
+type SvrHandler struct {
+	Cache cache.Cache
+	Store store.Store
+	Log   *zap.SugaredLogger
+}
 
 func (s *SvrHandler) Login(ctx context.Context, in *pb.AuthLoginArgs) (*pb.AuthTokenInfo, error) {
 	uid, err := checkLogin(ctx, in)

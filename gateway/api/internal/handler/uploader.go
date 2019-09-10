@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"io/ioutil"
@@ -7,12 +7,13 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	"a.com/go-server/common/crypto"
-	"a.com/go-server/gateway/api/base"
-	"a.com/go-server/gateway/api/errno"
 	"a.com/go-server/proto/pb"
+
+	"a.com/go-server/gateway/api/internal/base"
+	"a.com/go-server/gateway/api/internal/errno"
 )
 
-func (s *Service) Upload(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) Upload(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Sha  string `form:"sha" binding:"required"`
 		Ex   string `form:"ex" binding:"required"`
@@ -22,7 +23,7 @@ func (s *Service) Upload(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	if res, err := s.Grpc.Query(ctx.Request.Context(), &pb.FileQueryArgs{
+	if res, err := h.Grpc.Query(ctx.Request.Context(), &pb.FileQueryArgs{
 		Id: args.Sha,
 	}); err == nil {
 		return base.SuccessResponse(res)
@@ -35,18 +36,18 @@ func (s *Service) Upload(ctx *gin.Context) *base.JSONResponse {
 
 	id, err := crypto.Sha1(string(bin))
 	if err != nil {
-		s.Log.Error("sha1 file data err:%v", err)
+		h.Log.Error("sha1 file data err:%v", err)
 		return base.ErrorResponse(errno.INTERNEL_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.Upload(ctx.Request.Context(), &pb.FileUploadArgs{
+	res, err := h.Grpc.Upload(ctx.Request.Context(), &pb.FileUploadArgs{
 		Id:   id,
 		Ex:   args.Ex,
 		Type: pb.TYPE(args.Type),
 		Data: bin,
 	})
 	if err != nil {
-		s.Log.Error("upload file err:%v", err)
+		h.Log.Error("upload file err:%v", err)
 		return base.ErrorResponse(errno.INTERNEL_ERR, err.Error())
 	}
 	return base.SuccessResponse(res)

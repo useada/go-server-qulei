@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"fmt"
@@ -8,11 +8,11 @@ import (
 
 	"a.com/go-server/proto/pb"
 
-	"a.com/go-server/gateway/api/base"
-	"a.com/go-server/gateway/api/errno"
+	"a.com/go-server/gateway/api/internal/base"
+	"a.com/go-server/gateway/api/internal/errno"
 )
 
-func (s *Service) ListComments(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) ListComments(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		Cid       string `form:"cid"` // cid != "" 拉取二级评论
@@ -23,9 +23,9 @@ func (s *Service) ListComments(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	fmt.Println("--------", s.TraceId(ctx))
+	fmt.Println("--------", h.TraceId(ctx))
 
-	res, err := s.Grpc.ListComments(ctx.Request.Context(), &pb.CommListArgs{
+	res, err := h.Grpc.ListComments(ctx.Request.Context(), &pb.CommListArgs{
 		Oid:       args.Oid,
 		Cid:       args.Cid,
 		Uid:       "testuid", // TODO
@@ -37,7 +37,7 @@ func (s *Service) ListComments(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) GetComment(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) GetComment(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		ID  string `form:"id" binding:"required"`
 		Oid string `form:"oid" binding:"required"`
@@ -46,7 +46,7 @@ func (s *Service) GetComment(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.GetComment(ctx.Request.Context(), &pb.CommGetArgs{
+	res, err := h.Grpc.GetComment(ctx.Request.Context(), &pb.CommGetArgs{
 		Id:  args.ID,
 		Oid: args.Oid,
 		Uid: "testuid", // TODO
@@ -57,7 +57,7 @@ func (s *Service) GetComment(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) NewComment(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) NewComment(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid      string `json:"oid" binding:"required"`
 		Cid      string `json:"cid"`
@@ -70,7 +70,7 @@ func (s *Service) NewComment(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.NewComment(ctx.Request.Context(), &pb.CommNewArgs{
+	res, err := h.Grpc.NewComment(ctx.Request.Context(), &pb.CommNewArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Author: &pb.UserBaseInfo{
@@ -87,7 +87,7 @@ func (s *Service) NewComment(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) DelComment(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) DelComment(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		ID  string `json:"id" binding:"required"`
 		Oid string `json:"oid" binding:"required"`
@@ -97,7 +97,7 @@ func (s *Service) DelComment(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.DelComment(ctx.Request.Context(), &pb.CommDelArgs{
+	res, err := h.Grpc.DelComment(ctx.Request.Context(), &pb.CommDelArgs{
 		Id:  args.ID,
 		Oid: args.Oid,
 		Cid: args.Cid,
@@ -109,7 +109,7 @@ func (s *Service) DelComment(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) LikeComment(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) LikeComment(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 		Cid string `json:"cid" binding:"required"`
@@ -118,7 +118,7 @@ func (s *Service) LikeComment(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.LikeComment(ctx.Request.Context(), &pb.CommLikeArgs{
+	res, err := h.Grpc.LikeComment(ctx.Request.Context(), &pb.CommLikeArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Uid: "testuid", // TODO
@@ -129,7 +129,7 @@ func (s *Service) LikeComment(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) UnLikeComment(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) UnLikeComment(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 		Cid string `json:"cid" binding:"required"`
@@ -138,7 +138,7 @@ func (s *Service) UnLikeComment(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.UnLikeComment(ctx.Request.Context(), &pb.CommUnLikeArgs{
+	res, err := h.Grpc.UnLikeComment(ctx.Request.Context(), &pb.CommUnLikeArgs{
 		Oid: args.Oid,
 		Cid: args.Cid,
 		Uid: "testuid", // TODO
@@ -149,7 +149,7 @@ func (s *Service) UnLikeComment(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) ListLikes(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) ListLikes(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid       string `form:"oid" binding:"required"`
 		PageToken string `form:"page_token"`
@@ -159,7 +159,7 @@ func (s *Service) ListLikes(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.ListLikes(ctx.Request.Context(), &pb.LikeListArgs{
+	res, err := h.Grpc.ListLikes(ctx.Request.Context(), &pb.LikeListArgs{
 		Oid:       args.Oid,
 		PageToken: args.PageToken,
 	})
@@ -169,7 +169,7 @@ func (s *Service) ListLikes(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) NewLike(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) NewLike(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 	}
@@ -177,7 +177,7 @@ func (s *Service) NewLike(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.NewLike(ctx.Request.Context(), &pb.LikeNewArgs{
+	res, err := h.Grpc.NewLike(ctx.Request.Context(), &pb.LikeNewArgs{
 		Author: &pb.UserBaseInfo{
 			Uid: "testuid", // TODO
 		},
@@ -189,7 +189,7 @@ func (s *Service) NewLike(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) DelLike(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) DelLike(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oid string `json:"oid" binding:"required"`
 	}
@@ -197,7 +197,7 @@ func (s *Service) DelLike(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.DelLike(ctx.Request.Context(), &pb.LikeDelArgs{
+	res, err := h.Grpc.DelLike(ctx.Request.Context(), &pb.LikeDelArgs{
 		Uid: "testuid", // TODO
 		Oid: args.Oid,
 	})
@@ -207,7 +207,7 @@ func (s *Service) DelLike(ctx *gin.Context) *base.JSONResponse {
 	return base.SuccessResponse(res)
 }
 
-func (s *Service) GetSummaries(ctx *gin.Context) *base.JSONResponse {
+func (h *Handler) GetSummaries(ctx *gin.Context) *base.JSONResponse {
 	var args struct {
 		Oids []string `json:"oids" binding:"required"`
 	}
@@ -215,7 +215,7 @@ func (s *Service) GetSummaries(ctx *gin.Context) *base.JSONResponse {
 		return base.ErrorResponse(errno.ARGS_BIND_ERR, err.Error())
 	}
 
-	res, err := s.Grpc.GetSummaries(ctx.Request.Context(), &pb.SummaryArgs{
+	res, err := h.Grpc.GetSummaries(ctx.Request.Context(), &pb.SummaryArgs{
 		Uid:  "testuid", // TODO
 		Oids: args.Oids,
 	})

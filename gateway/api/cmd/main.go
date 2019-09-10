@@ -6,8 +6,8 @@ import (
 	"a.com/go-server/common/tracing"
 	"a.com/go-server/gclient"
 
-	"a.com/go-server/gateway/api/router"
-	"a.com/go-server/gateway/api/service"
+	"a.com/go-server/gateway/api/internal/handler"
+	"a.com/go-server/gateway/api/internal/router"
 )
 
 type Config struct {
@@ -37,7 +37,7 @@ func init() {
 }
 
 func main() {
-	svr := service.NewApiService(gclient.NewGrpcClient(Conf.Grpc),
+	handle := handler.NewApiHandler(gclient.NewGrpcClient(Conf.Grpc),
 		logger.InitLogger(Conf.Logger))
-	router.BindRouter(svr).Run(Conf.Server.Host)
+	router.BindRouter(handle).Run(Conf.Server.Host)
 }

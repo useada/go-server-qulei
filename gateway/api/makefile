@@ -1,6 +1,6 @@
 all:
 	cd ../../proto/pb/ && ./gen.sh
-	@go build -o gateway-api
+	@go build -o gateway-api cmd/*.go
 	@echo done.
 
 clean:

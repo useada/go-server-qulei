@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"go.uber.org/zap"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
 	"a.com/go-server/common/configor"
@@ -13,6 +13,11 @@ import (
 	"a.com/go-server/common/logger"
 	"a.com/go-server/common/mysql"
 	"a.com/go-server/common/redis"
+	"a.com/go-server/common/tracing"
+
+	"a.com/go-server/service/uauth/internal/cache"
+	"a.com/go-server/service/uauth/internal/handler"
+	"a.com/go-server/service/uauth/internal/store"
 )
 
 type Config struct {
@@ -35,27 +40,18 @@ type DiscoveryConfig struct {
 
 var (
 	Conf  Config
-	Log   *zap.SugaredLogger
 	LocIP string
 )
 
 func init() {
-	if err := configor.LoadConfig("./conf/conf.toml", &Conf); err != nil {
+	if err := configor.LoadConfig("./configs/conf.toml", &Conf); err != nil {
 		panic(err)
 	}
-
-	if err := mysql.Init(Conf.Mysql); err != nil {
-		panic(err)
-	}
-
-	redis.Init(Conf.Redis)
 
 	var err error
 	if LocIP, err = locip.GetLocalIP(); err != nil {
 		panic(err)
 	}
-
-	Log = logger.InitLogger(Conf.Logger)
 }
 
 func main() {
@@ -64,14 +60,21 @@ func main() {
 		fmt.Println("failed to listen:", err)
 		panic(err)
 	}
-	server := grpc.NewServer()
-	RegisterHandler(server)
+
+	grpcSvr := grpc.NewServer(
+		grpc.UnaryInterceptor(tracing.GrpcServerInterceptor(opentracing.GlobalTracer())),
+	)
+
+	handler.RegisterHandler(grpcSvr,
+		cache.NewRedisRepo(redis.NewPool(Conf.Redis)),
+		store.NewMysqlRepo(mysql.NewPool(Conf.Mysql)),
+		logger.InitLogger(Conf.Logger))
 
 	if err := consul.NewRegister(Conf.Discovery.Addr).
 		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}
-	consul.RegisterGrpcHealth(server)
+	consul.RegisterGrpcHealth(grpcSvr)
 
 	if err := server.Serve(listener); err != nil {
 		fmt.Println("failed to serve:", err)
