@@ -30,13 +30,13 @@ func (cli *Client) timeout() time.Duration {
 }
 
 type Config struct {
-	Discovery     string
+	Discover      string
 	Services      []string
 	RequstTimeout int64 `toml:"request_timeout"`
 }
 
 func NewGrpcClient(conf Config) *Client {
-	if len(conf.Discovery) == 0 || len(conf.Services) == 0 {
+	if len(conf.Discover) == 0 || len(conf.Services) == 0 {
 		panic("discovery or services empty")
 	}
 	if conf.RequstTimeout == 0 {
@@ -49,7 +49,7 @@ func NewGrpcClient(conf Config) *Client {
 	}
 
 	for _, service := range conf.Services {
-		conn, err := connect(conf.Discovery, service)
+		conn, err := connect(conf.Discover, service)
 		if err != nil {
 			panic(err)
 		}
@@ -58,8 +58,8 @@ func NewGrpcClient(conf Config) *Client {
 	return client
 }
 
-func connect(discovery, service string) (*grpc.ClientConn, error) {
-	r, err := consul.NewResolver(discovery)
+func connect(discover, service string) (*grpc.ClientConn, error) {
+	r, err := consul.NewResolver(discover)
 	if err != nil {
 		return nil, err
 	}

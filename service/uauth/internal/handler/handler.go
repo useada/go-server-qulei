@@ -13,22 +13,22 @@ import (
 	"a.com/go-server/service/uauth/internal/store"
 )
 
-func RegisterHandler(svr *grpc.Server, cache cache.Cache, store store.Store, log *zap.SugaredLogger) {
-	pb.RegisterUploaderServer(svr, &SvrHandler{
-		Cache: cache,
-		Store: store,
-		Log:   log,
-	})
-}
-
 type SvrHandler struct {
 	Cache cache.Cache
 	Store store.Store
 	Log   *zap.SugaredLogger
 }
 
+func RegisterHandler(svr *grpc.Server, cache cache.Cache, store store.Store, log *zap.SugaredLogger) {
+	pb.RegisterUauthServer(svr, &SvrHandler{
+		Cache: cache,
+		Store: store,
+		Log:   log,
+	})
+}
+
 func (s *SvrHandler) Login(ctx context.Context, in *pb.AuthLoginArgs) (*pb.AuthTokenInfo, error) {
-	uid, err := checkLogin(ctx, in)
+	uid, err := s.checkLogin(ctx, in)
 	fmt.Println(uid, err)
 
 	return nil, nil
@@ -55,31 +55,37 @@ func (s *SvrHandler) Detail(ctx context.Context, in *pb.AuthDetailArgs) (*pb.Aut
 }
 
 func (s *SvrHandler) checkLogin(ctx context.Context, in *pb.AuthLoginArgs) (string, error) {
+	var (
+		uid string
+		err error
+	)
 	switch in.Method {
 	case pb.AuthMethod_PASSWD:
-		return checkPasswd(ctx, in.Openid, in.Code)
+		uid, err = s.byPasswd(ctx, in.Openid, in.Code)
 	case pb.AuthMethod_SMS:
-		return checkSmsCode(ctx, in.Openid, in.Code)
+		uid, err = s.bySmsCode(ctx, in.Openid, in.Code)
 	case pb.AuthMethod_WECHAT:
-		return checkWechat(in.Openid, in.Code)
+		uid, err = s.byWechat(ctx, in.Openid, in.Code)
 	case pb.AuthMethod_QICQ:
-		return checkQicq(in.Openid, in.Code)
+		uid, err = s.byQicq(ctx, in.Openid, in.Code)
+	default:
+		uid, err = "", errors.New("method not support")
 	}
-	return "", errors.New("login method don't support")
+	return uid, err
 }
 
-func (s *SvrHandler) checkPasswd(ctx context.Context, openid, code string) (string, error) {
+func (s *SvrHandler) byPasswd(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }
 
-func (s *SvrHandler) checkSmsCode(ctx context.Context, openid, code string) (string, error) {
+func (s *SvrHandler) bySmsCode(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }
 
-func (s *SvrHandler) checkWechat(openid, code string) (string, error) {
+func (s *SvrHandler) byWechat(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }
 
-func (s *SvrHandler) checkQicq(openid, code string) (string, error) {
+func (s *SvrHandler) byQicq(ctx context.Context, openid, code string) (string, error) {
 	return "", nil
 }

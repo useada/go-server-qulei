@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -376,9 +375,6 @@ func (p *Pool) Doit(c context.Context, cmd string, h func(redis.Conn) error) err
 	defer span.Finish()
 
 	conn := p.Connections.Get()
-	if nil == conn {
-		return errors.New("get redis conn failed")
-	}
 	defer conn.Close()
 
 	return h(conn)

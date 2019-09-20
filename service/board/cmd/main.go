@@ -21,11 +21,11 @@ import (
 )
 
 type Config struct {
-	Server    ServerConfig
-	Discovery DiscoveryConfig
-	Logger    logger.Config
-	Redis     redis.Config
-	Mongo     mongo.Config
+	Server   ServerConfig
+	Discover DiscoverConfig
+	Logger   logger.Config
+	Redis    redis.Config
+	Mongo    mongo.Config
 }
 
 type ServerConfig struct {
@@ -34,7 +34,7 @@ type ServerConfig struct {
 	Port int
 }
 
-type DiscoveryConfig struct {
+type DiscoverConfig struct {
 	Addr string
 }
 
@@ -74,7 +74,7 @@ func main() {
 		store.NewMongoRepo(mongo.NewPool(Conf.Mongo)),
 		logger.InitLogger(Conf.Logger))
 
-	if err := consul.NewRegister(Conf.Discovery.Addr).
+	if err := consul.NewRegister(Conf.Discover.Addr).
 		Registe(Conf.Server.Name, LocIP, Conf.Server.Port); err != nil {
 		panic(err)
 	}

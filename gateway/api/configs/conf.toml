@@ -12,6 +12,6 @@ level = 0         # INFO
 compress = false
 
 [grpc]
-discovery = "127.0.0.1:8500"
+discover = "127.0.0.1:8500"
 services = ["board", "xxx"]
 request_timeout = 300 #ms

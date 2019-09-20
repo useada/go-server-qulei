@@ -12,7 +12,7 @@ max_age = 20      # 20 days
 level = 0         # INFO
 compress = false
 
-[discovery]
+[discover]
 addr = "127.0.0.1:8500"
 
 [s3]
